@@ -161,4 +161,3 @@ def _row(row: sqlite3.Row) -> dict:
 def job_from_row(row: dict) -> Job:
     data = {k: row[k] for k in JOB_FIELDS}
     return Job(**data, extra=row.get("extra") or {})
-

@@ -87,14 +87,18 @@ def validate(master: dict, proposal: dict, lang: str) -> dict:
         kept = []
         for b in exp.get("bullets", [])[:MAX_BULLETS]:
             if b.get("id") in bullets:
-                kept.append({"id": b["id"], "text": _check_bullet(bullets[b["id"]], b.get("text"), lang)})
+                kept.append(
+                    {"id": b["id"], "text": _check_bullet(bullets[b["id"]], b.get("text"), lang)}
+                )
         chosen[exp["id"]] = kept
     base = default_tailoring(master, lang)
     for exp in base["experiences"]:
         if chosen.get(exp["id"]):
             exp["bullets"] = chosen[exp["id"]]
     master_skills = {fold(s): s for s in all_skills(master, lang)}
-    first = [master_skills[fold(s)] for s in proposal.get("skills_first", []) if fold(s) in master_skills]
+    first = [
+        master_skills[fold(s)] for s in proposal.get("skills_first", []) if fold(s) in master_skills
+    ]
     base["skills_first"] = list(dict.fromkeys(first))
     base["headline"] = proposal.get("headline") or base["headline"]
     base["summary"] = proposal.get("summary") or base["summary"]
@@ -135,7 +139,9 @@ def heuristic_tailoring(master: dict, job: Job, lang: str) -> dict:
         ranked = sorted(src.get("bullets", []), key=lambda b: -overlap(tr(b, lang)))
         exp["bullets"] = [{"id": b["id"], "text": tr(b, lang)} for b in ranked[:MAX_BULLETS]]
     skills = all_skills(master, lang)
-    out["skills_first"] = [s for s in skills if fold(s).strip() and fold(s) in fold(job.description)]
+    out["skills_first"] = [
+        s for s in skills if fold(s).strip() and fold(s) in fold(job.description)
+    ]
     return out
 
 
@@ -188,7 +194,11 @@ def build_document(master: dict, tailored: dict) -> dict:
             for e in master["experience"]
         ],
         "education": [
-            {"school": ed.get("school", ""), "degree": tr(ed.get("degree"), lang), "year": str(ed.get("year", ""))}
+            {
+                "school": ed.get("school", ""),
+                "degree": tr(ed.get("degree"), lang),
+                "year": str(ed.get("year", "")),
+            }
             for ed in master.get("education", [])
         ],
         "languages": [tr(x, lang) for x in master.get("languages", [])],
@@ -197,10 +207,20 @@ def build_document(master: dict, tailored: dict) -> dict:
 
 
 LABELS = {
-    "en": {"summary": "Summary", "experience": "Experience", "skills": "Skills",
-           "education": "Education", "languages": "Languages"},
-    "fr": {"summary": "Profil", "experience": "Expérience", "skills": "Compétences",
-           "education": "Formation", "languages": "Langues"},
+    "en": {
+        "summary": "Summary",
+        "experience": "Experience",
+        "skills": "Skills",
+        "education": "Education",
+        "languages": "Languages",
+    },
+    "fr": {
+        "summary": "Profil",
+        "experience": "Expérience",
+        "skills": "Compétences",
+        "education": "Formation",
+        "languages": "Langues",
+    },
 }
 
 

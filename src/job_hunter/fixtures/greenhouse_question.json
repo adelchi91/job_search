@@ -1,0 +1,292 @@
+{
+ "id": 5076109008,
+ "questions": [
+  {
+   "description": null,
+   "label": "First Name",
+   "required": true,
+   "fields": [
+    {
+     "name": "first_name",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Last Name",
+   "required": true,
+   "fields": [
+    {
+     "name": "last_name",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Email",
+   "required": true,
+   "fields": [
+    {
+     "name": "email",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Phone",
+   "required": false,
+   "fields": [
+    {
+     "name": "phone",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Resume/CV",
+   "required": false,
+   "fields": [
+    {
+     "name": "resume",
+     "type": "input_file",
+     "values": []
+    },
+    {
+     "name": "resume_text",
+     "type": "textarea",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": "<p>How do you pronounce your name?</p>",
+   "label": "(Optional) Personal Preferences",
+   "required": false,
+   "fields": [
+    {
+     "name": "question_14533381008",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Website",
+   "required": false,
+   "fields": [
+    {
+     "name": "question_14533382008",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Are you open to working in-person in one of our offices 25% of the time?",
+   "required": true,
+   "fields": [
+    {
+     "name": "question_14533383008",
+     "type": "multi_value_single_select",
+     "values": [
+      {
+       "label": "Yes",
+       "value": 1
+      },
+      {
+       "label": "No",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "When is the earliest you would want to start working with us?",
+   "required": false,
+   "fields": [
+    {
+     "name": "question_14533384008",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Do you have any deadlines or timeline considerations we should be aware of?",
+   "required": false,
+   "fields": [
+    {
+     "name": "question_14533385008",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": "<p>We believe that AI will have a transformative impact on the world, and we&rsquo;re seeking exceptional candidates who collaborate thoughtfully with Claude to realize this vision. At the same time, we want to understand your unique skills, expertise, and perspective through our hiring process. We invite you to review our <a href=\"https://www.anthropic.com/candidate-ai-guidance\">AI partnership guidelines for candidates</a> and confirm your understanding by selecting &ldquo;Yes.&rdquo;</p>",
+   "label": "AI Policy for Application",
+   "required": true,
+   "fields": [
+    {
+     "name": "question_14533386008",
+     "type": "multi_value_single_select",
+     "values": [
+      {
+       "label": "Yes",
+       "value": 1
+      },
+      {
+       "label": "No",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "description": "<p>Why do you want to work at Anthropic? (We value this response highly - great answers are often 200-400 words.)</p>",
+   "label": "Why Anthropic?",
+   "required": true,
+   "fields": [
+    {
+     "name": "question_14533387008",
+     "type": "textarea",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Do you require visa sponsorship? ",
+   "required": true,
+   "fields": [
+    {
+     "name": "question_14533388008",
+     "type": "multi_value_single_select",
+     "values": [
+      {
+       "label": "Yes",
+       "value": 1
+      },
+      {
+       "label": "No",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Will you now or will you in the future require employment visa sponsorship to work in the country in which the job you're applying for is located? ",
+   "required": true,
+   "fields": [
+    {
+     "name": "question_14533389008",
+     "type": "multi_value_single_select",
+     "values": [
+      {
+       "label": "Yes",
+       "value": 1
+      },
+      {
+       "label": "No",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "description": "<p>Add a cover letter or anything else you want to share.</p>",
+   "label": "Additional Information",
+   "required": false,
+   "fields": [
+    {
+     "name": "question_14533390008",
+     "type": "textarea",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": "<p>Please ensure to provide <em>either</em> your LinkedIn profile or Resume, we require at least one of the two.&nbsp;</p>",
+   "label": "LinkedIn Profile",
+   "required": false,
+   "fields": [
+    {
+     "name": "question_14533391008",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Are you open to relocation for this role? ",
+   "required": true,
+   "fields": [
+    {
+     "name": "question_14533392008",
+     "type": "multi_value_single_select",
+     "values": [
+      {
+       "label": "Yes",
+       "value": 1
+      },
+      {
+       "label": "No",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "What is the address from which you plan on working? If you would need to relocate, please type \"relocating\".",
+   "required": false,
+   "fields": [
+    {
+     "name": "question_14533393008",
+     "type": "input_text",
+     "values": []
+    }
+   ]
+  },
+  {
+   "description": null,
+   "label": "Have you ever interviewed at Anthropic before?",
+   "required": true,
+   "fields": [
+    {
+     "name": "question_14533394008",
+     "type": "multi_value_single_select",
+     "values": [
+      {
+       "label": "Yes",
+       "value": 1
+      },
+      {
+       "label": "No",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -62,8 +62,11 @@ def cover_letter(master: dict, tailored: dict, job: Job, llm: LLM | None, model:
         prompt = COVER_PROMPT.format(
             lang=tailored["lang"],
             cv=yaml.safe_dump(
-                {"name": master.get("name"), "summary": tr(master.get("summary"), "en"),
-                 "tailored": tailored},
+                {
+                    "name": master.get("name"),
+                    "summary": tr(master.get("summary"), "en"),
+                    "tailored": tailored,
+                },
                 allow_unicode=True,
             )[:10000],
             title=job.title,

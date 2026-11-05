@@ -1,0 +1,276 @@
+{
+ "jobs": [
+  {
+   "id": "647be1ec-19d1-421c-9c49-6bbf12c0c93a",
+   "title": "Applied AI, Forward Deployed Engineer - CyberSecurity (Europe)",
+   "department": "Solutions",
+   "team": "Use-Case",
+   "employmentType": "FullTime",
+   "location": "Paris",
+   "secondaryLocations": [],
+   "publishedAt": "2026-07-09T16:15:37.487+00:00",
+   "isListed": true,
+   "isRemote": null,
+   "workplaceType": null,
+   "address": {
+    "postalAddress": {
+     "addressRegion": "Ile-de-France",
+     "addressCountry": "France",
+     "addressLocality": "Paris"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/mistral.ai/647be1ec-19d1-421c-9c49-6bbf12c0c93a",
+   "applyUrl": "https://jobs.ashbyhq.com/mistral.ai/647be1ec-19d1-421c-9c49-6bbf12c0c93a/application",
+   "descriptionPlain": "ABOUT MISTRAL\n\nMistral provides full-stack AI solutions: from frontier models to developer tools, applications, and compute. We partner with enterprises tackling the hardest problems across high-stakes industries like finance, manufacturing, defense, healthcare, and the public sector, co-creating customized AI systems that they can run on their terms.\n\nWe are a dynamic, collaborative team passionate about AI and its potential to transform society. Our diverse workforce thrives in competitive environments and is committed to driving innovation. Our teams are distributed between Europe, North America, Asia and the Middle East. We are creative, low-ego and team-spirited.\n\n\n\nRole Summary\n\n\n\nWe are seeking an Applied AI, Forward Deployed Engineer to build customer use cases on top of the Mistral stack. You will turn \"we have agents\" into \"we shipped something a client uses.\" This role is about composing cybersecurity-related agentic workflows, configuring harnesses for real-world scenarios, and delivering value directly to clients.\n\n\n\nAs a Forward Deployed Engineer at Mistral, you may also work on use cases outside cybersecurity, bringing the same context engineering, orchestration, and eval work to enterprise workflows in finance, manufacturing, defense, or the public sector.\n\n\n\nWhat You Will Do\n\n\n\n- Client-Facing Agentic Solutions\n\n- You'll individually help deploy into production use cases with considerable business impact across various industries, with cybersecurity client as"
+  },
+  {
+   "id": "37108a18-4eaa-4554-af3c-39e3556191cb",
+   "title": "Applied AI, Forward Deployed Machine Learning Engineer - Paris",
+   "department": "Solutions",
+   "team": "Use-Case",
+   "employmentType": "FullTime",
+   "location": "Paris",
+   "secondaryLocations": [],
+   "publishedAt": "2026-06-25T16:39:21.369+00:00",
+   "isListed": true,
+   "isRemote": null,
+   "workplaceType": null,
+   "address": {
+    "postalAddress": {
+     "addressRegion": "Ile-de-France",
+     "addressCountry": "France",
+     "addressLocality": "Paris"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/mistral.ai/37108a18-4eaa-4554-af3c-39e3556191cb",
+   "applyUrl": "https://jobs.ashbyhq.com/mistral.ai/37108a18-4eaa-4554-af3c-39e3556191cb/application",
+   "descriptionPlain": "ABOUT MISTRAL\n\nMistral provides full-stack AI solutions: from frontier models to developer tools, applications, and compute. We partner with enterprises tackling the hardest problems across high-stakes industries like finance, manufacturing, defense, healthcare, and the public sector, co-creating customized AI systems that they can run on their terms.\n\nWe are a dynamic, collaborative team passionate about AI and its potential to transform society. Our diverse workforce thrives in competitive environments and is committed to driving innovation. Our teams are distributed between Europe, North America, Asia and the Middle East. We are creative, low-ego and team-spirited.\n\n\n\nAbout The Job\n\n\u00a0\n\nMistral AI is seeking a Applied AI Engineer to facilitate the adoption of its products among customers and collaborate with them to address complex technical challenges.\n\n\u00a0\n\nThe Applied AI team is Mistral's customer-facing technical organization. We work directly with enterprise clients from pre-sales through implementation to deploy cutting-edge AI solutions that deliver measurable business impact.\n\n\u00a0\n\nOur team combines deep ML expertise with strong customer engagement skills, operating like startup CTOs who own end-to-end project execution. By joining the team you'll will bridge the gap between cutting-edge AI research and real-world enterprise applications, ensuring our solutions are robust, scalable, and aligned with both customer needs and Mistral's technological vision.\n\n\u00a0\n\nWhat you wi"
+  },
+  {
+   "id": "ea4ff9e5-3ccd-4eab-982c-46c1de9ade67",
+   "title": "Infrastructure Solution Architect",
+   "department": "Solutions",
+   "team": "Deployment Strategist",
+   "employmentType": "FullTime",
+   "location": "Paris",
+   "secondaryLocations": [
+    {
+     "location": "Amsterdam",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "Netherlands",
+       "addressLocality": "Amsterdam"
+      }
+     }
+    },
+    {
+     "location": "Munich",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "Bavaria",
+       "addressCountry": "Germany",
+       "addressLocality": "Munich"
+      }
+     }
+    },
+    {
+     "location": "London",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "United Kingdom",
+       "addressLocality": "London"
+      }
+     }
+    }
+   ],
+   "publishedAt": "2026-07-09T15:49:42.516+00:00",
+   "isListed": true,
+   "isRemote": null,
+   "workplaceType": null,
+   "address": {
+    "postalAddress": {
+     "addressRegion": "Ile-de-France",
+     "addressCountry": "France",
+     "addressLocality": "Paris"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/mistral.ai/ea4ff9e5-3ccd-4eab-982c-46c1de9ade67",
+   "applyUrl": "https://jobs.ashbyhq.com/mistral.ai/ea4ff9e5-3ccd-4eab-982c-46c1de9ade67/application",
+   "descriptionPlain": "ABOUT MISTRAL\n\nMistral provides full-stack AI solutions: from frontier models to developer tools, applications, and compute. We partner with enterprises tackling the hardest problems across high-stakes industries like finance, manufacturing, defense, healthcare, and the public sector, co-creating customized AI systems that they can run on their terms.\n\nWe are a dynamic, collaborative team passionate about AI and its potential to transform society. Our diverse workforce thrives in competitive environments and is committed to driving innovation. Our teams are distributed between Europe, North America, Asia and the Middle East. We are creative, low-ego and team-spirited.\n\n\n\nThe Role\n\n\u00a0\n\n\u2022 You'll be the catalyst driving the adoption and scaling of cutting-edge AI solutions. It's a purely individual contributor role.\n\n\u2022 You'll work at the intersection of innovation and impact, empowering businesses to leverage GenAI for transformative results.\n\n\u2022 You'll guide companies in integrating GenAI solutions, making AI a tangible part of their operations.\n\n\u2022 You'll drive the scaling of GenAI technologies, ensuring seamless transitions from concept to production.\n\n\u2022 You'll partner closely with our product and science teams to deliver state-of-the-art AI solutions tailored to client needs.\n\n\u2022 You'll tackle complex business problems with AI, delivering measurable outcomes and strategic advantages.\n\n\u2022 You'll contribute to the evolution of AI technology, influencing how businesses operate and c"
+  },
+  {
+   "id": "52e1cc10-dfe0-4361-81c1-227f70f61e20",
+   "title": "Applied AI Engineer, Prototyping",
+   "department": "Solutions",
+   "team": "Use-Case",
+   "employmentType": "FullTime",
+   "location": "Paris",
+   "secondaryLocations": [
+    {
+     "location": "Singapore",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "Singapore",
+       "addressCountry": "Singapore",
+       "addressLocality": "Singapore"
+      }
+     }
+    }
+   ],
+   "publishedAt": "2026-08-11T12:34:34.584+00:00",
+   "isListed": true,
+   "isRemote": null,
+   "workplaceType": null,
+   "address": {
+    "postalAddress": {
+     "addressRegion": "Ile-de-France",
+     "addressCountry": "France",
+     "addressLocality": "Paris"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/mistral.ai/52e1cc10-dfe0-4361-81c1-227f70f61e20",
+   "applyUrl": "https://jobs.ashbyhq.com/mistral.ai/52e1cc10-dfe0-4361-81c1-227f70f61e20/application",
+   "descriptionPlain": "ABOUT MISTRAL\n\nMistral provides full-stack AI solutions: from frontier models to developer tools, applications, and compute. We partner with enterprises tackling the hardest problems across high-stakes industries like finance, manufacturing, defense, healthcare, and the public sector, co-creating customized AI systems that they can run on their terms.\n\nWe are a dynamic, collaborative team passionate about AI and its potential to transform society. Our diverse workforce thrives in competitive environments and is committed to driving innovation. Our teams are distributed between Europe, North America, Asia and the Middle East. We are creative, low-ego and team-spirited.\n\n\n\n\nTHE ROLE\n\nAs an Applied AI Engineer on the Proto team, you will lead the design and delivery of robust, production-grade AI systems in rapid development cycles. The Proto team sits at the intersection of product and customer, turning advanced technology into meaningful, real-world solutions. You will be deeply involved in both client-facing and internal projects, ensuring Mistral\u2019s capabilities directly address business needs and drive measurable value.\n\nYou will translate complex, often ambiguous business requirements into engineered solutions that work at scale. In this role, you guide technical decisions, collaborate closely with internal teams and customers, and help shape product direction by pressure-testing what\u2019s possible. Your work will unlock new business opportunities and help drive continuous pro"
+  },
+  {
+   "id": "22fee4f2-f6c9-4516-a0cd-92d6aeb21a52",
+   "title": "AI Deployment Strategist - USA",
+   "department": "Solutions",
+   "team": "Deployment Strategist",
+   "employmentType": "FullTime",
+   "location": "Palo Alto",
+   "secondaryLocations": [
+    {
+     "location": "New York",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "New York",
+       "addressCountry": "United States",
+       "addressLocality": "New York"
+      }
+     }
+    },
+    {
+     "location": "San Francisco",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "California",
+       "addressCountry": "United States",
+       "addressLocality": "San Francisco"
+      }
+     }
+    }
+   ],
+   "publishedAt": "2026-07-10T17:15:03.403+00:00",
+   "isListed": true,
+   "isRemote": true,
+   "workplaceType": "Hybrid",
+   "address": {
+    "postalAddress": {
+     "addressRegion": "California",
+     "addressCountry": "United States",
+     "addressLocality": "Palo Alto"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/mistral.ai/22fee4f2-f6c9-4516-a0cd-92d6aeb21a52",
+   "applyUrl": "https://jobs.ashbyhq.com/mistral.ai/22fee4f2-f6c9-4516-a0cd-92d6aeb21a52/application",
+   "descriptionPlain": "ABOUT MISTRAL\n\nMistral provides full-stack AI solutions: from frontier models to developer tools, applications, and compute. We partner with enterprises tackling the hardest problems across high-stakes industries like finance, manufacturing, defense, healthcare, and the public sector, co-creating customized AI systems that they can run on their terms.\n\nWe are a dynamic, collaborative team passionate about AI and its potential to transform society. Our diverse workforce thrives in competitive environments and is committed to driving innovation. Our teams are distributed between Europe, North America, Asia and the Middle East. We are creative, low-ego and team-spirited.\n\n\n\nRole Summary\u00a0\n\n\n\nAs an AI Deployment Strategist, you will drive the adoption and deployment of Mistral\u2019s AI solutions, working closely with customers from strategic vision to production implementation. This role sits at the intersection of business strategy, AI innovation, and hands-on deployment, ensuring our customers achieve transformative outcomes.\n\n\u00a0\n\nYou will partner with senior executives to design AI roadmaps, collaborate with the Applied AI team to deliver solutions in production, and ensure seamless transitions from presales to postsales. Your work will directly contribute to customer success, bridging the gap between strategy and execution.\n\n\u00a0\n\nThis role is ideal for those who thrive in a fast-paced environment, enjoy solving complex business challenges, and are passionate about turning AI potentia"
+  },
+  {
+   "id": "647826f5-37f4-48b7-b5b8-5b7bee6d8e23",
+   "title": "Engineering Manager, Fleet Delivery",
+   "department": "Engineering & Infra",
+   "team": "Cloud",
+   "employmentType": "FullTime",
+   "location": "Paris",
+   "secondaryLocations": [
+    {
+     "location": "Zurich",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "Switzerland"
+      }
+     }
+    },
+    {
+     "location": "Madrid",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "Spain"
+      }
+     }
+    },
+    {
+     "location": "Amsterdam",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "Netherlands",
+       "addressLocality": "Amsterdam"
+      }
+     }
+    },
+    {
+     "location": "Warsaw",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "Poland",
+       "addressLocality": "Warsaw"
+      }
+     }
+    },
+    {
+     "location": "Linz",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "Austria",
+       "addressLocality": "Linz"
+      }
+     }
+    },
+    {
+     "location": "Munich",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "Bavaria",
+       "addressCountry": "Germany",
+       "addressLocality": "Munich"
+      }
+     }
+    },
+    {
+     "location": "London",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "United Kingdom",
+       "addressLocality": "London"
+      }
+     }
+    },
+    {
+     "location": "Berlin",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "Germany",
+       "addressLocality": "Berlin"
+      }
+     }
+    }
+   ],
+   "publishedAt": "2026-10-28T22:35:02.299+00:00",
+   "isListed": true,
+   "isRemote": true,
+   "workplaceType": "Remote",
+   "address": {
+    "postalAddress": {
+     "addressRegion": "Ile-de-France",
+     "addressCountry": "France",
+     "addressLocality": "Paris"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/mistral.ai/647826f5-37f4-48b7-b5b8-5b7bee6d8e23",
+   "applyUrl": "https://jobs.ashbyhq.com/mistral.ai/647826f5-37f4-48b7-b5b8-5b7bee6d8e23/application",
+   "descriptionPlain": "ABOUT MISTRAL\n\nMistral provides full-stack AI solutions: from frontier models to developer tools, applications, and compute. We partner with enterprises tackling the hardest problems across high-stakes industries like finance, manufacturing, defense, healthcare, and the public sector, co-creating customized AI systems that they can run on their terms.\n\nWe are a dynamic, collaborative team passionate about AI and its potential to transform society. Our diverse workforce thrives in competitive environments and is committed to driving innovation. Our teams are distributed between Europe, North America, Asia and the Middle East. We are creative, low-ego and team-spirited.\n\n\n\n\nTHE TEAM\n\nMistral is building a sovereign AI cloud for Europe. Our customers in finance, healthcare, and the public sector run frontier models on European-jurisdiction infrastructure, and the Cloud Platform team builds the systems that make that possible \u2014 compute orchestration, Kubernetes, bare metal, storage, networking, and the datacenter fleet that runs it all.\n\nEuropean Compute Units let enterprises commit to multi-year capacity on that infrastructure, and we are scaling toward a gigawatt of compute across Europe by 2030. You will design and ship the layer every sovereign AI deployment depends on and shape the team building it.\n\n\n\n\nTHE ROLE\n\nA datacenter is not a cloud until software makes it one. You will lead the team that turns arriving hardware into accepted clusters.\n\nCabling validation, burn-in, f"
+  }
+ ],
+ "apiVersion": "1"
+}

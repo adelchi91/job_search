@@ -28,14 +28,16 @@ Return JSON: {{"score": <int 0-100>, "reason": "<one sentence>", "language": "<e
 
 
 def heuristic_score(job: Job, cv_text: str, roles: list[str]) -> tuple[int, str]:
-    """Keyword overlap between the posting and the CV, plus a bonus for a target-role title."""
+    """Keyword overlap between the posting and the CV, plus a bonus when the title contains
+    one of `roles` (target role names and title keywords)."""
     title = fold(job.title)
     role_hit = any(fold(r) in title for r in roles)
     words = {w for w in fold(job.description).split() if len(w) > 3}
     cv_words = {w for w in fold(cv_text).split() if len(w) > 3}
     overlap = len(words & cv_words) / max(len(words), 1)
     score = min(100, int(40 * role_hit + 30 + 120 * overlap))
-    return score, f"heuristic: title {'matches' if role_hit else 'near'} a target role, overlap {overlap:.0%}"
+    title_note = "matches" if role_hit else "near"
+    return score, f"heuristic: title {title_note} a target role, overlap {overlap:.0%}"
 
 
 def detect_language(job: Job) -> str:
@@ -47,7 +49,14 @@ def detect_language(job: Job) -> str:
     return "fr" if fr > en else "en"
 
 
-def score_job(job: Job, cv_text: str, roles: list[str], llm: LLM | None, model: str) -> dict:
+def score_job(
+    job: Job,
+    cv_text: str,
+    roles: list[str],
+    llm: LLM | None,
+    model: str,
+    keywords: list[str] | None = None,
+) -> dict:
     """Returns {"score", "reason", "language"}."""
     lang = detect_language(job)
     if llm is not None:
@@ -66,5 +75,5 @@ def score_job(job: Job, cv_text: str, roles: list[str], llm: LLM | None, model: 
             return {"score": score, "reason": str(out.get("reason", "")), "language": lang}
         except Exception as exc:  # noqa: BLE001 - fall back to the heuristic
             log.warning("LLM scoring failed for %s: %s", job.title, exc)
-    score, reason = heuristic_score(job, cv_text, roles)
+    score, reason = heuristic_score(job, cv_text, roles + (keywords or []))
     return {"score": score, "reason": reason, "language": lang}

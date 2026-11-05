@@ -17,7 +17,9 @@ log = logging.getLogger("job_hunter.collectors")
 # Public search-only key served to every visitor of welcometothejungle.com.
 WTTJ_APP = "CSEKHVMS53"
 WTTJ_KEY = "4bd8f6215d0cc52b26430765769e65a0"
-WTTJ_URL = f"https://{WTTJ_APP.lower()}-dsn.algolia.net/1/indexes/wttj_jobs_production_{{lang}}/query"
+WTTJ_URL = (
+    f"https://{WTTJ_APP.lower()}-dsn.algolia.net/1/indexes/wttj_jobs_production_{{lang}}/query"
+)
 
 
 def parse_wttj(data: dict) -> list[Job]:
@@ -60,7 +62,9 @@ def _wttj_salary(h: dict) -> str:
     lo, hi = h.get("salary_minimum"), h.get("salary_maximum")
     if not (lo or hi):
         return ""
-    return f"{lo or '?'}-{hi or '?'} {h.get('salary_currency') or ''} {h.get('salary_period') or ''}"
+    return (
+        f"{lo or '?'}-{hi or '?'} {h.get('salary_currency') or ''} {h.get('salary_period') or ''}"
+    )
 
 
 @dataclass
@@ -177,9 +181,13 @@ class HnCollector:
     name: str = "hn"
 
     def collect(self, client: httpx.Client) -> list[Job]:
-        story = client.get(
-            HN_SEARCH, params={"query": "Ask HN: Who is hiring?", "tags": "story,author_whoishiring"}
-        ).json()["hits"][0]
+        stories = client.get(
+            HN_SEARCH,
+            params={"query": "Ask HN: Who is hiring?", "tags": "story,author_whoishiring"},
+        ).json()["hits"]
+        if not stories:
+            return []
+        story = stories[0]
         comments = client.get(
             HN_SEARCH,
             params={"tags": f"comment,story_{story['objectID']}", "hitsPerPage": 1000},
