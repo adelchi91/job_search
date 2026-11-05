@@ -25,7 +25,9 @@ def make_client(transport: httpx.BaseTransport | None = None) -> httpx.Client:
     )
 
 
-def strip_html(text: str) -> str:
+def strip_html(text: str | list | None) -> str:
+    if isinstance(text, list):  # WTTJ sends some sections (key_missions) as a list of items
+        text = "\n".join(f"- {t}" for t in text if t)
     text = html.unescape(text or "")
     text = re.sub(r"<(br|/p|/li|/h\d)[^>]*>", "\n", text, flags=re.I)
     text = re.sub(r"<li[^>]*>", "- ", text, flags=re.I)

@@ -29,6 +29,11 @@ def test_strip_html_keeps_text_and_breaks():
     ]
 
 
+def test_strip_html_accepts_wttj_lists():
+    assert strip_html(["Own the demo", "", "Run <b>POCs</b>"]) == "- Own the demo\n- Run POCs"
+    assert strip_html(None) == ""
+
+
 def test_each_ats_parser_yields_jobs():
     cases = [
         Company("Anthropic", "greenhouse", "anthropic"),
