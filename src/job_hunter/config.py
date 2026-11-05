@@ -44,6 +44,9 @@ class Settings:
     score_model: str = "claude-haiku-5-5"
     tailor_model: str = "claude-sonnet-5-5"
     jobspy_sites: list[str] = field(default_factory=lambda: ["linkedin", "indeed", "glassdoor"])
+    # argv that receives the digest markdown as its last argument after a live run
+    # (e.g. rev0 comment 3 --author board -m); empty means the digest stays a file.
+    digest_command: list[str] = field(default_factory=list)
     profile: Profile = field(default_factory=Profile)
     companies: list[Company] = field(default_factory=list)
     data_dir: Path = Path("data")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import plistlib
+import sys
 
 from conftest import FakeLLM, make_job
 
@@ -84,3 +85,19 @@ def test_cli_schedule(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(schedule, "install", lambda d: tmp_path / "x.plist")
     assert cli.main(["schedule"]) == 0
     assert "launchctl bootstrap" in capsys.readouterr().out
+
+
+def test_post_digest_runs_configured_command(settings, tmp_path):
+    from job_hunter.cli import post_digest
+
+    assert post_digest(settings, "# digest") is False  # nothing configured
+    out = tmp_path / "posted.txt"
+    settings.digest_command = [
+        sys.executable,
+        "-c",
+        f"import sys; open({str(out)!r}, 'w').write(sys.argv[1])",
+    ]
+    assert post_digest(settings, "# digest") is True
+    assert out.read_text() == "# digest"
+    settings.digest_command = ["/nonexistent/command"]
+    assert post_digest(settings, "x") is False

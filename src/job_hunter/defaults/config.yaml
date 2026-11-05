@@ -98,3 +98,7 @@ profile:
     salary_expectation: ""
     work_authorisation: ""
     location: Paris, France
+
+# Command that receives the daily digest markdown as its last argument (empty: file only).
+# Example: ["/Applications/rev0.app/Contents/Resources/board/rev0", "comment", "3", "--author", "board", "-m"]
+digest_command: []

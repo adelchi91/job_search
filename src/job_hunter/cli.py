@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import logging
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -49,6 +50,18 @@ def _dry_run_settings(base: Path) -> Settings:
     return settings
 
 
+def post_digest(settings: Settings, digest: str) -> bool:
+    """Hand the digest to the configured command (e.g. a board comment). Never fails the run."""
+    if not settings.digest_command:
+        return False
+    try:
+        done = subprocess.run([*settings.digest_command, digest], timeout=60, check=False)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        logging.getLogger("job_hunter").warning("digest command failed: %s", exc)
+        return False
+    return done.returncode == 0
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     base = Path(args.data)
     if args.dry_run:
@@ -68,6 +81,8 @@ def cmd_run(args: argparse.Namespace) -> int:
     print(result.digest)
     print(f"Prepared {len(result.prepared)} application(s). Digest: {result.digest_path}")
     print("Nothing was submitted." if args.dry_run else "Open the dashboard: job-hunter serve")
+    if not args.dry_run and post_digest(settings, result.digest):
+        print("Digest posted.")
     return 0
 
 
