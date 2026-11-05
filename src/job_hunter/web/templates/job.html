@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ job.company }} — {{ job.title }}{% endblock %}
+{% block body %}
+<div class="panel">
+  <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+    <h1 style="margin:0; font-size:20px">{{ job.title }} — {{ job.company }}</h1>
+    <span class="score">{{ job.score if job.score is not none else '–' }}</span>
+    <span class="muted">{{ job.status }} · {{ job.location or '—' }} · {{ job.source }}{% if job.also_seen_on %} (also on {{ job.also_seen_on|join(', ') }}){% endif %}</span>
+  </div>
+  <p class="muted">{{ job.score_reason }}</p>
+  {% if job.route_reason %}<p class="reason">{{ job.route_reason }}</p>{% endif %}
+  <p>
+    <a href="{{ job.url }}" target="_blank">Posting</a>
+    {% if job.apply_url and job.apply_url != job.url %} · <a href="{{ job.apply_url }}" target="_blank">Application form</a>{% endif %}
+    {% if job.cv_path %} · <a href="/jobs/{{ job.id }}/cv.pdf" target="_blank">Tailored CV (PDF)</a>
+    · <a href="/jobs/{{ job.id }}/cover_letter.pdf" target="_blank">Cover letter (PDF)</a>{% endif %}
+  </p>
+  <div style="display:flex; gap:8px; flex-wrap:wrap">
+    {% if job.status == Status.READY %}
+    <form method="post" action="/jobs/{{ job.id }}/send"
+          onsubmit="return confirm('Fill and submit the application to {{ job.company }} now?')">
+      <button class="primary">Approve &amp; send</button>
+    </form>
+    {% endif %}
+    <form method="post" action="/jobs/{{ job.id }}/status" style="display:flex; gap:6px">
+      <select name="status">{% for s in moves %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select>
+      <button>Move</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="panel">
+    <h3>CV changes vs master</h3>
+    {% if job.cv_diff %}
+    <pre class="diff">{% for line in job.cv_diff.splitlines() %}{% if line.startswith('+') and not line.startswith('+++') %}<span class="add">{{ line }}</span>{% elif line.startswith('-') and not line.startswith('---') %}<span class="del">{{ line }}</span>{% else %}{{ line }}
+{% endif %}{% endfor %}</pre>
+    {% else %}<p class="muted">Not tailored yet.</p>{% endif %}
+  </div>
+  <div class="panel">
+    <form method="post" action="/jobs/{{ job.id }}/answers">
+      <h3>Form answers</h3>
+      {% for q, a in job.answers.items() %}
+      <label>{{ q }}{% if not a %} <strong style="color:#b45309">(needs your answer)</strong>{% endif %}
+        <input type="text" name="a:{{ q }}" value="{{ a }}"></label><br><br>
+      {% else %}<p class="muted">No extra questions detected.</p>{% endfor %}
+      <h3>Cover letter</h3>
+      <textarea name="cover_letter">{{ job.cover_letter }}</textarea>
+      <p><button>Save</button></p>
+    </form>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="panel"><h3>Posting</h3><div class="desc">{{ job.description }}</div></div>
+  <div class="panel"><h3>History</h3>
+    <table>{% for e in events %}<tr><td class="muted">{{ e.at }}</td><td>{{ e.kind }}</td><td>{{ e.detail }}</td></tr>{% endfor %}</table>
+  </div>
+</div>
+{% endblock %}

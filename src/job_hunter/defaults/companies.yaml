@@ -1,0 +1,24 @@
+# Watchlist: companies searched directly on their own careers ATS every run.
+# ats: greenhouse | lever | ashby | workable. Empty ats = covered by board search by name.
+companies:
+  - {name: Mistral AI, ats: ashby, token: mistral.ai}
+  - {name: Anthropic, ats: greenhouse, token: anthropic}
+  - {name: OpenAI, ats: ashby, token: openai}
+  - {name: Hugging Face, ats: workable, token: huggingface}
+  - {name: Google, ats: ""}
+  - {name: Cohere, ats: ashby, token: cohere}
+  - {name: Databricks, ats: greenhouse, token: databricks}
+  - {name: Snowflake, ats: ashby, token: snowflake}
+  - {name: Dataiku, ats: greenhouse, token: dataiku}
+  - {name: Palantir, ats: lever, token: palantir}
+  - {name: Scale AI, ats: greenhouse, token: scaleai}
+  - {name: ElevenLabs, ats: ashby, token: elevenlabs}
+  - {name: H Company, ats: ashby, token: hcompany}
+  - {name: Poolside, ats: ashby, token: poolside}
+  - {name: Dust, ats: ashby, token: dust}
+  - {name: LightOn, ats: workable, token: lighton}
+  - {name: Photoroom, ats: ashby, token: photoroom}
+  - {name: Dassault Systèmes, ats: ""}
+  - {name: Siemens, ats: ""}
+  - {name: PhysicsX, ats: greenhouse, token: physicsx, region: eu}
+  - {name: Neural Concept, ats: ashby, token: neuralconcept}

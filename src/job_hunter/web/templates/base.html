@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Job tracker{% endblock %}</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1d2330; --muted:#6b7280; --line:#e5e7eb;
+          --ready:#0f766e; --needs:#b45309; --applied:#1d4ed8; --int:#7c3aed; --offer:#15803d; }
+  * { box-sizing: border-box; }
+  body { margin:0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { display:flex; align-items:center; gap:16px; padding:12px 20px; background:#111827; color:#fff; }
+  header a { color:#fff; text-decoration:none; font-weight:600; }
+  header .counts { margin-left:auto; color:#cbd5e1; font-size:13px; }
+  main { padding: 16px 20px; }
+  .lanes { display:grid; grid-template-columns: repeat(5, minmax(220px, 1fr)); gap:12px; align-items:start; }
+  .lane { background:#eef0f4; border-radius:10px; padding:10px; min-height:120px; }
+  .lane h2 { font-size:13px; margin:0 0 2px; text-transform:uppercase; letter-spacing:.04em; }
+  .lane .hint { color:var(--muted); font-size:12px; margin-bottom:8px; }
+  .lane.ready h2 { color:var(--ready);} .lane.needs_you h2 { color:var(--needs);}
+  .lane.applied h2 { color:var(--applied);} .lane.interview h2 { color:var(--int);} .lane.offer h2 { color:var(--offer);}
+  .card { display:block; background:var(--card); border:1px solid var(--line); border-radius:8px;
+          padding:8px 10px; margin-bottom:8px; color:inherit; text-decoration:none; }
+  .card:hover { border-color:#9ca3af; }
+  .card .co { font-weight:600; } .card .meta { color:var(--muted); font-size:12px; }
+  .score { float:right; font-weight:700; font-size:12px; padding:1px 6px; border-radius:10px; background:#e0f2fe; }
+  .score.hi { background:#dcfce7; } .score.lo { background:#fee2e2; }
+  details.side { margin-top:16px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:8px 12px; }
+  details.side table { width:100%; border-collapse:collapse; }
+  td, th { text-align:left; padding:4px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .panel { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:14px; }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+  pre.diff { white-space:pre-wrap; font-size:12px; background:#fafafa; padding:10px; border-radius:6px; max-height:420px; overflow:auto; }
+  .add { color:#166534; background:#f0fdf4; display:block; } .del { color:#991b1b; background:#fef2f2; display:block; }
+  textarea, input[type=text] { width:100%; font:inherit; padding:6px; border:1px solid var(--line); border-radius:6px; }
+  textarea { min-height:160px; }
+  button { font:inherit; padding:7px 14px; border-radius:6px; border:1px solid #d1d5db; background:#fff; cursor:pointer; }
+  button.primary { background:var(--ready); border-color:var(--ready); color:#fff; font-weight:600; }
+  .reason { padding:8px 10px; border-radius:6px; background:#fffbeb; border:1px solid #fde68a; }
+  .desc { white-space:pre-wrap; max-height:360px; overflow:auto; color:#374151; }
+  .muted { color:var(--muted); }
+</style>
+</head>
+<body>
+<header><a href="/">Job tracker</a>{% block header %}{% endblock %}</header>
+<main>{% block body %}{% endblock %}</main>
+</body>
+</html>

@@ -1,0 +1,232 @@
+{
+ "hits": [
+  {
+   "name": "Pre-Sales AI Consultant",
+   "slug": "pre-sales-ai-consultant_new-york_nksjcnxe",
+   "language": "en",
+   "published_at": "2026-10-28T00:13:35Z",
+   "offices": [
+    {
+     "state": null,
+     "city": "San Francisco",
+     "country": "United States",
+     "country_code": "US",
+     "district": null,
+     "local_district": null,
+     "local_city": null,
+     "local_state": null
+    },
+    {
+     "state": null,
+     "city": "Austin",
+     "country": "United States",
+     "country_code": "US",
+     "district": null,
+     "local_district": null,
+     "local_city": null,
+     "local_state": null
+    },
+    {
+     "state": null,
+     "city": "Raleigh",
+     "country": "United States",
+     "country_code": "US",
+     "district": null,
+     "local_district": null,
+     "local_city": null,
+     "local_state": null
+    },
+    {
+     "state": null,
+     "city": "New York",
+     "country": "United States",
+     "country_code": "US",
+     "district": null,
+     "local_district": null,
+     "local_city": null,
+     "local_state": null
+    }
+   ],
+   "remote": "unknown",
+   "contract_type": "full_time",
+   "organization": {
+    "name": "WalkMe",
+    "slug": "walkme"
+   },
+   "summary": "Join WalkMe as a Pre-Sales AI Consultant, where you will work closely with sales and presales teams across the Americas to support customers in evaluating, adopting, and scaling WalkMe AI. You will act as a trusted technical advisor throughout the sales cycle, guiding technical discovery, leading AI-focused demonstrations, and supporting customers as they assess how WalkMe AI fits into their broader enterprise AI initiatives. This highly customer-facing role requires strong technical expertise and the ability to communicate complex concepts clearly to diverse audiences.",
+   "key_missions": "Partner with WalkMe Account Executives and Presales teams across Americas, taking a consultative role in customer evaluations of WalkMe AI.\nLead AI-focused discovery sessions, answer technical and architectural questions, and guide customers through solution design considerations.\nBuild, customize, and deliver product demonstrations that clearly communicate the value of WalkMe AI.",
+   "profile": " - An AI-first approach to work, using AI tools thoughtfully to increase speed, quality, and effectiveness while applying judgment and ownership to outputs\n- Ability to examine, interpret, and clearly articulate complex technical concepts to audiences with varying levels of technical depth, from engineers to executive stakeholders\n- Strong experience working with generative and contextual AI, including exposure to LLMs, AI architectures, deployment models, prompt development, and enterprise security considerations\n- A minimum of 7–8 years of experience in SaaS, working with enterprise customers in a presales, sales engineering, consulting, or solution architecture capacity\n- A strong understanding of enterprise technology environments and the business context in which AI solutions are eval",
+   "salary_minimum": 220000.0,
+   "salary_maximum": 300000.0,
+   "salary_currency": "USD",
+   "salary_period": "yearly",
+   "objectID": "2642534b-f96f-4184-bbb3-3e86fef7424b",
+   "reference": "2642534b-f96f-4184-bbb3-3e86fef7424b"
+  },
+  {
+   "name": "Principal Presales Solution Architect (Agentic Identity)",
+   "slug": "principal-solution-architect-field-agentic-identity_us_4gvz6zji",
+   "language": "en",
+   "published_at": "2026-09-17T00:04:43Z",
+   "offices": [
+    {
+     "state": null,
+     "city": null,
+     "country": "United States",
+     "country_code": "US",
+     "district": null,
+     "local_district": null,
+     "local_city": null,
+     "local_state": null
+    }
+   ],
+   "remote": "fulltime",
+   "contract_type": "full_time",
+   "organization": {
+    "name": "AppViewX",
+    "slug": "appviewx"
+   },
+   "summary": "Join AppViewX as a Principal Presales Solution Architect (Agentic Identity). In this hybrid role, you will be the company's foremost technical voice on agentic identity security, engaging with CISOs and CTOs at strategic accounts, shaping the AIS narrative with analysts, and representing the company at industry events. You will also own the technical backbone of AIS pre-sales and work closely with SE Leads and product stakeholders. This position offers competitive compensation, health insurance, wellness benefits, flexible hours, and opportunities for career growth.",
+   "key_missions": "Engaging with CISO and CTO-level stakeholders at strategic accounts to shape the agentic identity security narrative.\nOwning the technical backbone of agentic identity security pre-sales, including the Use Case Map, demo environments, and reference architectures.\nLeading or co-leading the most strategic and complex agentic identity security opportunities globally, including high-stakes POCs/POVs.",
+   "profile": " - Bachelor's degree in Computer Science, Information Systems, Cybersecurity, or equivalent experience\n- Strong working knowledge of agentic AI systems, non-human/workload identity, and service account governance - and the ability to speak credibly to both engineering and executive audiences\n- 10+ years of experience in enterprise security pre-sales, solutions architecture, or a senior technical leadership role, with direct exposure to identity, IAM, machine identity, or related security domains\n- Willingness and ability to travel 30–50% for customer, analyst, and industry engagements\n- Strong written and verbal communication skills, able to move fluidly between deep technical detail and executive narrative\n- Demonstrated experience engaging CISO- and CTO-level stakeholders on strategic, m",
+   "salary_minimum": null,
+   "salary_maximum": null,
+   "salary_currency": null,
+   "salary_period": null,
+   "objectID": "9eca9a15-fe07-4d23-b5ed-5f931424bbc3",
+   "reference": "9eca9a15-fe07-4d23-b5ed-5f931424bbc3"
+  },
+  {
+   "name": "Sales Engineer (Ambient AI)",
+   "slug": "sales-engineer-ambient-ai_us_dn7iynft",
+   "language": "en",
+   "published_at": "2026-09-24T00:01:14Z",
+   "offices": [
+    {
+     "state": null,
+     "city": null,
+     "country": "United States",
+     "country_code": "US",
+     "district": null,
+     "local_district": null,
+     "local_city": null,
+     "local_state": null
+    }
+   ],
+   "remote": "fulltime",
+   "contract_type": "full_time",
+   "organization": {
+    "name": "Athelas",
+    "slug": "athelas"
+   },
+   "summary": "Join Commure as a Sales Engineer specializing in Ambient AI. In this presales role, you will partner with Account Executives on various pilots and work closely with Engineering, implementation, and operations teams to ensure success. You will be responsible for scoping pilots, building EHR integrations, bringing advanced AI into the pilot, managing templates, keeping pilots healthy, enabling the sales team, and ensuring a smooth handoff to implementation. Success will be measured by the timely launch of pilots, effective triaging of in-pilot issues, provider usage of Ambient AI, and seamless handoffs to implementation.",
+   "key_missions": "Partner with Account Executives on Commure Ambient pilots and advanced AI pilots with healthcare practices, ensuring successful implementation and integration.\nLead the technical scoping call for each pilot, working directly with providers and decision makers to capture specialty, note types, EHR, and workflow.\nOwn the pilot Slack channel as the thread of record, triage in-pilot requests, and keep status and usage current in Salesforce.",
+   "profile": " - The ability to explain to a physician or technical teams how ambient AI builds a note, where it can miss, and what to do about it, in plain language\n- A strong sense of ownership. Pilots launch on an SE's approval, and you take that responsibility seriously\n- Strong organization. You can juggle several pilots across multiple EHRs, keep Salesforce current, use Slack as your thread of record, and write updates that are short and specific\n- Hands-on experience with at least one ambulatory EHR (athenahealth, eClinicalWorks, AdvancedMD, NextGen, ModMed, Practice Fusion, WebPT). Epic, Cerner, or Meditech Expanse is a plus\n- Healthcare fluency: clinical documentation, specialty workflows, HIPAA, and the security questionnaires (SOC 2, HITRUST) that come with selling into practices\n- Comfort re",
+   "salary_minimum": 120000.0,
+   "salary_maximum": 135000.0,
+   "salary_currency": "USD",
+   "salary_period": "yearly",
+   "objectID": "598adf76-6178-4728-af1d-929d23acfd0d",
+   "reference": "598adf76-6178-4728-af1d-929d23acfd0d"
+  },
+  {
+   "name": "Presales Consultant",
+   "slug": "presales-consultant_ca_imkgi3jb",
+   "language": "en",
+   "published_at": "2026-10-31T00:02:51Z",
+   "offices": [
+    {
+     "state": null,
+     "city": null,
+     "country": "Canada",
+     "country_code": "CA",
+     "district": null,
+     "local_district": null,
+     "local_city": null,
+     "local_state": null
+    }
+   ],
+   "remote": "fulltime",
+   "contract_type": "full_time",
+   "organization": {
+    "name": "Ada",
+    "slug": "ada"
+   },
+   "summary": "Join Ada, a leading AI-powered customer service platform, as a Presales Consultant. In this hands-on role, you will partner with Account Managers and Account Executives to uncover customer pain points and demonstrate the value of Ada's AI solutions. You will take full technical ownership of a North American book of accounts, lead technical evaluations, and set closed deals up for a fast launch. This position offers unlimited vacation, wellness benefits, extended health coverage, and a generous stock option plan.",
+   "key_missions": "Partner with Account Managers and Account Executives to run discovery with customer service leaders, uncover operational challenges, and demonstrate AI solutions.\nDesign automation-first solutions for complex deals, lead technical evaluations and proofs of concept, and take full technical ownership of a North American book of accounts.\nOwn the technical answers to RFPs and security questionnaires, grow technical win rate, influenced pipeline, and closed ARR across your book.",
+   "profile": " - Proven track record of winning deals by communicating value and differentiation\n- Exceptional communication, storytelling, and relationship-building skills\n- 3-5 years in presales, solutions consulting, or presales engineering\n- Strong understanding of AI technologies, including LLMs and generative models, and their business applications\n- Technical proficiency with APIs, SaaS platforms (e.g. Salesforce, Shopify, Zendesk, HubSpot), and integration methodologies",
+   "salary_minimum": null,
+   "salary_maximum": null,
+   "salary_currency": null,
+   "salary_period": null,
+   "objectID": "9fdb9ef1-267b-4597-8274-33afa6b79a42",
+   "reference": "9fdb9ef1-267b-4597-8274-33afa6b79a42"
+  },
+  {
+   "name": "AI Project Director (Delivery & Presales) H/F",
+   "slug": "ai-project-director-delivery-presales-h-f_paris",
+   "language": "fr",
+   "published_at": "2026-09-06T22:02:05Z",
+   "offices": [
+    {
+     "state": "Ile-de-France",
+     "city": "Paris",
+     "country": "France",
+     "country_code": "FR",
+     "district": "Paris",
+     "local_district": "Paris",
+     "local_city": "Paris",
+     "local_state": "Île-de-France"
+    }
+   ],
+   "remote": "partial",
+   "contract_type": "full_time",
+   "organization": {
+    "name": "Gojob",
+    "slug": "gojob"
+   },
+   "summary": "Rejoignez Gojob, une entreprise innovante dans le domaine de l'IA et du SaaS. En tant que Directeur de Projet SaaS, vous serez responsable de la réussite des déploiements clients et de la contribution aux phases d'avant-vente. Vous interviendrez en amont pour comprendre les besoins des clients et construire des solutions adaptées, puis en aval pour garantir leur succès opérationnel. Vous serez un acteur clé à l'intersection entre les ventes, le produit et la technologie.",
+   "key_missions": "Piloter les projets d’implémentation SaaS de bout en bout, en structurant les plannings, ressources et budgets.\nParticiper activement aux phases d’avant-vente, en construisant des réponses structurées et en menant les soutenances.\nCoordonner les équipes internes et gérer la relation client, en assurant la satisfaction et en identifiant les risques.",
+   "profile": null,
+   "salary_minimum": null,
+   "salary_maximum": null,
+   "salary_currency": null,
+   "salary_period": null,
+   "objectID": "55babf5b-fc6f-4d38-83b5-ce6120553b7b",
+   "reference": "55babf5b-fc6f-4d38-83b5-ce6120553b7b"
+  },
+  {
+   "name": "Presales Team Lead",
+   "slug": "presales-team-lead_new-york",
+   "language": "en",
+   "published_at": "2026-10-30T00:01:01Z",
+   "offices": [
+    {
+     "state": "New York",
+     "city": "New York",
+     "country": "United States",
+     "country_code": "US",
+     "district": "New York",
+     "local_district": null,
+     "local_city": null,
+     "local_state": null
+    }
+   ],
+   "remote": "partial",
+   "contract_type": "full_time",
+   "organization": {
+    "name": "ChapsVision",
+    "slug": "chapsvision"
+   },
+   "summary": "Join ChapsVision, a global leader in Agentic AI and data solutions. As the Presales Team Lead, you will manage and develop the presales team while remaining hands-on in strategic customer opportunities. You will partner closely with Sales, Product, Engineering, Delivery, and prospective customers to understand complex business challenges and demonstrate how ChapsVision can transform fragmented data into actionable intelligence. This is a hybrid role based in New York, NY, with travel required to support customer meetings, strategic opportunities, demonstrations, and industry events.",
+   "key_missions": "Manage, coach, and develop presales engineers and interns, prioritizing presales engagement with Sales.\nPartner with Account Executives to understand customer business challenges, lead technical discovery sessions.\nDesign and deliver compelling demonstrations showcasing Sinequa and ArgonOS capabilities and business value.",
+   "profile": null,
+   "salary_minimum": null,
+   "salary_maximum": null,
+   "salary_currency": null,
+   "salary_period": null,
+   "objectID": "1c215976-ee49-4172-84e8-7e681a59b2b9",
+   "reference": "1c215976-ee49-4172-84e8-7e681a59b2b9"
+  }
+ ]
+}
