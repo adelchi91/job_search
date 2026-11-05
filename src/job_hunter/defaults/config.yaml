@@ -1,0 +1,78 @@
+# Search profile. `job-hunter init` copies this to data/config.yaml; edit that copy.
+roles:
+  - Presales Engineer
+  - Forward Deployed Engineer
+  - AI Engineer
+  - AI Architect
+  - AI Solutions Engineer
+# A title must contain one of these (case-insensitive) to be kept.
+role_keywords:
+  - presales
+  - pre-sales
+  - avant-vente
+  - forward deployed
+  - fde
+  - solutions engineer
+  - solution engineer
+  - solutions architect
+  - solution architect
+  - ai engineer
+  - ai architect
+  - ml engineer
+  - machine learning engineer
+  - applied ai
+  - llm engineer
+  - genai
+  - generative ai
+  - sales engineer
+  - customer engineer
+  - ingénieur ia
+  - ingénieur avant-vente
+  - architecte ia
+# A title containing one of these is dropped.
+exclude_keywords:
+  - intern
+  - stage
+  - stagiaire
+  - alternance
+  - apprenti
+  - director
+  - vp
+  - head of
+# Office locations accepted (matched against the posting location, accent-insensitive).
+locations:
+  - paris
+  - ile-de-france
+  - île-de-france
+  - france
+# Remote postings are kept if their location mentions one of these.
+remote_regions:
+  - europe
+  - emea
+  - eu
+  - france
+  - remote
+board_queries:
+  - presales AI
+  - forward deployed engineer
+  - AI engineer
+  - AI architect
+  - AI solutions engineer
+  - ingénieur avant-vente IA
+fit_threshold: 60
+max_open_per_company: 2
+max_tailored_per_run: 15
+score_model: claude-haiku-5-5
+tailor_model: claude-sonnet-5-5
+jobspy_sites: [linkedin, indeed, glassdoor]
+profile:
+  name: ""
+  email: ""
+  phone: ""
+  linkedin: ""
+  github: ""
+  answers:
+    notice_period: ""
+    salary_expectation: ""
+    work_authorisation: ""
+    location: Paris, France

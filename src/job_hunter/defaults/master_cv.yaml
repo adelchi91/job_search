@@ -1,0 +1,74 @@
+# PLACEHOLDER master CV. `job-hunter init` copies this to data/master_cv.yaml.
+# Replace it with your real CV (or ask the agent to convert your PDF/DOCX into this shape).
+# Every bilingual field is either a plain string or {en: ..., fr: ...}.
+# Tailoring may only select/reorder/reword these bullets; it never adds new facts.
+name: Sample Candidate
+headline:
+  en: AI Solutions Engineer
+  fr: Ingénieur Solutions IA
+contact:
+  email: candidate@example.com
+  phone: "+33 6 00 00 00 00"
+  location: Paris, France
+  linkedin: linkedin.com/in/sample
+  github: github.com/sample
+summary:
+  en: >-
+    Engineer working at the boundary of customers and product: scoping, prototyping and
+    deploying LLM and simulation solutions with enterprise teams.
+  fr: >-
+    Ingénieur à l'interface entre clients et produit : cadrage, prototypage et déploiement
+    de solutions LLM et de simulation auprès d'équipes grands comptes.
+skills:
+  - group: {en: AI & ML, fr: IA & ML}
+    items: [LLMs, RAG, Agents, PyTorch, Evaluation]
+  - group: {en: Engineering, fr: Ingénierie}
+    items: [Python, FastAPI, SQL, Docker, Kubernetes, AWS]
+  - group: {en: Customer-facing, fr: Relation client}
+    items: [Presales, Discovery workshops, Demos, Technical writing]
+experience:
+  - id: acme
+    company: Acme Industrial Software
+    role: {en: Solutions Engineer, fr: Ingénieur Solutions}
+    location: Paris
+    start: "2022"
+    end: {en: present, fr: aujourd'hui}
+    bullets:
+      - id: acme-1
+        en: Led technical discovery and demos for 25 enterprise prospects in manufacturing.
+        fr: Pilotage de la découverte technique et des démos pour 25 prospects industriels.
+      - id: acme-2
+        en: Built a RAG assistant over engineering documentation used by 300 engineers.
+        fr: Conception d'un assistant RAG sur la documentation technique utilisé par 300 ingénieurs.
+      - id: acme-3
+        en: Deployed Python/FastAPI services on Kubernetes for on-premise customers.
+        fr: Déploiement de services Python/FastAPI sur Kubernetes chez des clients on-premise.
+      - id: acme-4
+        en: Wrote proof-of-concept plans and success criteria with customer architects.
+        fr: Rédaction de plans de POC et de critères de succès avec les architectes clients.
+      - id: acme-5
+        en: Trained 40 customer users on the platform and its APIs.
+        fr: Formation de 40 utilisateurs clients à la plateforme et à ses API.
+  - id: lab
+    company: Research Lab
+    role: {en: Machine Learning Engineer, fr: Ingénieur Machine Learning}
+    location: Paris
+    start: "2019"
+    end: "2022"
+    bullets:
+      - id: lab-1
+        en: Trained surrogate models with PyTorch that cut simulation time by 90%.
+        fr: Entraînement de modèles de substitution PyTorch réduisant le temps de simulation de 90 %.
+      - id: lab-2
+        en: Set up evaluation pipelines and dashboards for model quality.
+        fr: Mise en place de pipelines d'évaluation et de tableaux de bord qualité.
+      - id: lab-3
+        en: Published 2 papers on geometric deep learning.
+        fr: Publication de 2 articles sur le deep learning géométrique.
+education:
+  - school: Engineering School
+    degree: {en: MSc Engineering, fr: Diplôme d'ingénieur}
+    year: 2019
+languages:
+  - {en: French (native), fr: Français (natif)}
+  - {en: English (fluent), fr: Anglais (courant)}
