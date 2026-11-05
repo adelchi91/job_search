@@ -109,3 +109,17 @@ def test_extra_sections_and_dates():
     assert doc["sections"] == [{"title": "Publications", "items": ["P1"]}]
     assert doc["experience"][0]["dates"] == "2013"
     assert tr(2021, "en") == "2021"
+
+
+def test_context_and_technology_lines(tmp_path):
+    exp = {
+        **MASTER["experience"][0],
+        "context": {"en": "Ctx EN", "fr": "Ctx FR"},
+        "technology": "Python",
+    }
+    master = {**MASTER, "experience": [exp]}
+    doc = build_document(master, default_tailoring(master, "fr"))
+    e = doc["experience"][0]
+    assert (e["context"], e["technology"]) == ("Ctx FR", "Python")
+    assert "Ctx FR" in to_text(doc)
+    assert render_cv(doc, tmp_path / "cv.pdf").read_bytes()[:4] == b"%PDF"

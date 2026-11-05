@@ -193,6 +193,8 @@ def build_document(master: dict, tailored: dict) -> dict:
                 "company": e.get("company", ""),
                 "location": tr(e.get("location"), lang),
                 "dates": _dates(tr(e.get("start"), lang), tr(e.get("end"), lang)),
+                "context": tr(e.get("context"), lang),
+                "technology": tr(e.get("technology"), lang),
                 "bullets": [b["text"] for b in bullets.get(e["id"], [])],
             }
             for e in master["experience"]
@@ -216,16 +218,18 @@ def build_document(master: dict, tailored: dict) -> dict:
 
 LABELS = {
     "en": {
-        "summary": "Summary",
-        "experience": "Experience",
-        "skills": "Skills",
+        "summary": "Profile",
+        "experience": "Work Experience",
+        "skills": "Core Skills",
+        "technology": "Technology",
         "education": "Education",
         "languages": "Languages",
     },
     "fr": {
         "summary": "Profil",
         "experience": "Expérience",
-        "skills": "Compétences",
+        "skills": "Compétences clés",
+        "technology": "Technologies",
         "education": "Formation",
         "languages": "Langues",
     },
@@ -238,6 +242,7 @@ def to_text(doc: dict) -> str:
         lines.append(f"{s['group']}: {', '.join(s['items'])}")
     for e in doc["experience"]:
         lines += ["", f"{e['role']} — {e['company']} ({e['dates']})"]
+        lines += [f"  {e['context']}"] if e["context"] else []
         lines += [f"  • {b}" for b in e["bullets"]]
     return "\n".join(lines)
 
