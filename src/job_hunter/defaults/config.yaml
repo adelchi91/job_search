@@ -44,14 +44,36 @@ locations:
   - paris
   - ile-de-france
   - île-de-france
-  - france
-# Remote postings are kept if their location mentions one of these.
+  - idf
+  - la defense
+  - boulogne-billancourt
+  - issy-les-moulineaux
+  - levallois-perret
+  - neuilly-sur-seine
+  - rueil-malmaison
+  - nanterre
+  - courbevoie
+  - puteaux
+  - saint-denis
+  - saint-ouen
+  - montreuil
+  - pantin
+  - clichy
+  - saint-cloud
+  - versailles
+  - velizy
+  - guyancourt
+  - massy
+  - palaiseau
+  - saclay
+# Remote postings are kept only if their location names one of these regions
+# (a bare "Remote" or a remote role outside Europe is dropped).
 remote_regions:
   - europe
   - emea
   - eu
+  - eea
   - france
-  - remote
 board_queries:
   - presales AI
   - forward deployed engineer

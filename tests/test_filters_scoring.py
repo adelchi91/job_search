@@ -27,6 +27,13 @@ def test_location_rules(settings):
     assert not keep(make_job(location="New York"), settings)
 
 
+def test_location_scope_is_idf_or_remote_europe(settings):
+    assert location_matches(make_job(location="Rueil-Malmaison, France"), settings)
+    assert not location_matches(make_job(location="Bordeaux, France"), settings)
+    assert not location_matches(make_job(location="NZ-New Zealand-Remote", remote="full"), settings)
+    assert location_matches(make_job(location="Remote (France)", remote="full"), settings)
+
+
 def test_heuristic_rewards_target_titles():
     cv = "unrelated words only"
     hit, _ = heuristic_score(make_job(), cv, ["forward deployed"])
