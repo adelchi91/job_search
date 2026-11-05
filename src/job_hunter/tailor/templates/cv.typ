@@ -52,3 +52,10 @@
   #section(L.languages)
   #cv.languages.join(" · ")
 ]
+
+#for s in cv.at("sections", default: ()) [
+  #section(s.title)
+  #for i in s.items [
+    - #i
+  ]
+]

@@ -97,3 +97,15 @@ def test_render_pdfs(tmp_path):
     cv = render_cv(doc, tmp_path / "cv.pdf")
     letter = render_letter(doc, "Dear team,\n\nHello.", "Mistral AI", "FDE", tmp_path / "l.pdf")
     assert cv.read_bytes()[:4] == b"%PDF" and letter.read_bytes()[:4] == b"%PDF"
+
+
+def test_extra_sections_and_dates():
+    master = {
+        **MASTER,
+        "experience": [{**MASTER["experience"][0], "start": 2013, "end": "2013"}],
+        "sections": [{"title": {"en": "Publications", "fr": "Publications"}, "items": ["P1"]}],
+    }
+    doc = build_document(master, default_tailoring(master, "fr"))
+    assert doc["sections"] == [{"title": "Publications", "items": ["P1"]}]
+    assert doc["experience"][0]["dates"] == "2013"
+    assert tr(2021, "en") == "2021"

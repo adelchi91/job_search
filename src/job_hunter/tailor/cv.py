@@ -49,7 +49,7 @@ def tr(value, lang: str) -> str:
     """Bilingual fields are either a plain string or {en: ..., fr: ...}."""
     if isinstance(value, dict):
         return value.get(lang) or value.get("en") or next(iter(value.values()), "")
-    return value or ""
+    return "" if value is None else str(value)
 
 
 def load_master(path: Path) -> dict:
@@ -162,6 +162,10 @@ def tailor(master: dict, job: Job, lang: str, llm: LLM | None, model: str) -> di
     return heuristic_tailoring(master, job, lang)
 
 
+def _dates(start: str, end: str) -> str:
+    return start if not end or end == start else f"{start} – {end}"
+
+
 def build_document(master: dict, tailored: dict) -> dict:
     """Merge master + tailoring into the flat document the Typst template renders."""
     lang = tailored["lang"]
@@ -188,7 +192,7 @@ def build_document(master: dict, tailored: dict) -> dict:
                 "role": tr(e.get("role"), lang),
                 "company": e.get("company", ""),
                 "location": tr(e.get("location"), lang),
-                "dates": f"{e.get('start', '')} – {tr(e.get('end'), lang)}",
+                "dates": _dates(tr(e.get("start"), lang), tr(e.get("end"), lang)),
                 "bullets": [b["text"] for b in bullets.get(e["id"], [])],
             }
             for e in master["experience"]
@@ -202,6 +206,10 @@ def build_document(master: dict, tailored: dict) -> dict:
             for ed in master.get("education", [])
         ],
         "languages": [tr(x, lang) for x in master.get("languages", [])],
+        "sections": [
+            {"title": tr(s.get("title"), lang), "items": [tr(i, lang) for i in s.get("items", [])]}
+            for s in master.get("sections", [])
+        ],
         "labels": LABELS[lang],
     }
 
