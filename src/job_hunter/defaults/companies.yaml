@@ -22,3 +22,45 @@ companies:
   - {name: Siemens, ats: ""}
   - {name: PhysicsX, ats: greenhouse, token: physicsx, region: eu}
   - {name: Neural Concept, ats: ashby, token: neuralconcept}
+  # AI-for-CAD competitors (from the #veille-concurrentielle Slack channel, Feb-Mar 2026)
+  - {name: Zoo, ats: greenhouse, token: zoo}
+  - {name: Backflip, ats: ""}
+  - {name: MecAgent, ats: ""}
+  - {name: NexCAD, ats: ""}
+  - {name: AdamCAD, ats: ""}
+  - {name: Leo AI, ats: ""}
+  # AI technical-drawing verification
+  - {name: Werk24, ats: ""}
+  - {name: AIReview, ats: ""}
+  - {name: Cosmon, ats: ""}
+  - {name: Elysium, ats: ""}
+  # CAD / PLM / simulation vendors
+  - {name: PTC, ats: ""}
+  - {name: Autodesk, ats: ""}
+  - {name: Altair, ats: ""}
+  - {name: Synopsys, ats: ""}
+  - {name: Bentley Systems, ats: ""}
+  # AI for materials discovery
+  - {name: CuspAI, ats: ashby, token: cuspai}
+  - {name: Orbital Industries, ats: ashby, token: orbitalindustries}
+  - {name: Holyvolt, ats: ""}
+  - {name: Altrove, ats: ""}
+  - {name: Entalpic, ats: ""}
+  - {name: Dunia Innovations, ats: ""}
+  - {name: Polaron, ats: ""}
+  - {name: polySCOUT, ats: ""}
+  - {name: Mafer AI, ats: ""}
+  # Battery AI and diagnostics
+  - {name: ACCURE, ats: ""}
+  - {name: Sention Technologies, ats: ""}
+  - {name: CeLLife, ats: ""}
+  - {name: Capalo AI, ats: ""}
+  # Molecular simulation and quantum chemistry
+  - {name: Phasecraft, ats: ""}
+  - {name: Kvantify, ats: ""}
+  - {name: Achira, ats: ashby, token: achira}
+  # Large non-European AI-for-science companies
+  - {name: Lila Sciences, ats: greenhouse, token: lilasciences}
+  - {name: Periodic Labs, ats: ""}
+  - {name: Citrine Informatics, ats: ""}
+  - {name: Radical AI, ats: ""}
