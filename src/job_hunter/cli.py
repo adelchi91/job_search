@@ -86,6 +86,16 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_rerender(args: argparse.Namespace) -> int:
+    from job_hunter.pipeline import rerender
+
+    settings = load_settings(Path(args.data))
+    llm = None if args.no_llm else get_llm()
+    done = rerender(Store(settings.db_path), settings, llm)
+    print(f"Re-rendered {len(done)} application(s).")
+    return 0
+
+
 def cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
 
@@ -126,6 +136,9 @@ def parser() -> argparse.ArgumentParser:
     s = sub.add_parser("serve", help="start the tracker dashboard on localhost")
     s.add_argument("--port", type=int, default=8000)
     s.set_defaults(func=cmd_serve)
+    rr = sub.add_parser("rerender", help="rebuild prepared CV/letter PDFs with the current look")
+    rr.add_argument("--no-llm", action="store_true", help="heuristic tailoring for old items")
+    rr.set_defaults(func=cmd_rerender)
     sub.add_parser("init", help="create editable config files").set_defaults(func=cmd_init)
     sub.add_parser("schedule", help="install the weekday 08:00 launchd job").set_defaults(
         func=cmd_schedule

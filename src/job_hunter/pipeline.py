@@ -5,6 +5,7 @@ Nothing is ever submitted here. Sending happens only from the dashboard's Send b
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -77,12 +78,8 @@ def prepare(
     job = job_from_row(row)
     lang = row["language"] or "en"
     tailored = tailor(master, job, lang, llm, settings.tailor_model)
-    doc = build_document(master, tailored)
     letter = cover_letter(master, tailored, job, llm, settings.tailor_model)
-    out_dir = settings.data_dir / "applications" / f"{row['id']:05d}"
-    cv_pdf = render_cv(doc, out_dir / f"CV_{_slug(master.get('name', 'cv'))}_{lang}.pdf")
-    render_letter(doc, letter, job.company, job.title, out_dir / "cover_letter.pdf")
-    (out_dir / "cover_letter.txt").write_text(letter, encoding="utf-8")
+    cv_pdf = render_application(row, master, tailored, letter, settings)
     r = route(job, settings.profile, client)
     answers = {**r.answers, **{q: "" for q in r.open_questions}}
     store.update(
@@ -94,6 +91,52 @@ def prepare(
         route_reason=r.reason,
     )
     store.set_status(row["id"], r.status, r.reason)
+
+
+def _app_dir(settings: Settings, job_id: int) -> Path:
+    return settings.data_dir / "applications" / f"{job_id:05d}"
+
+
+def render_application(
+    row: dict, master: dict, tailored: dict, letter: str, settings: Settings
+) -> Path:
+    """Write the CV and letter PDFs plus tailoring.json, so the PDFs can be rebuilt later."""
+    out_dir = _app_dir(settings, row["id"])
+    out_dir.mkdir(parents=True, exist_ok=True)
+    doc = build_document(master, tailored)
+    lang = tailored.get("lang") or row["language"] or "en"
+    for old in out_dir.glob("CV_*.pdf"):
+        old.unlink()
+    cv_pdf = render_cv(doc, out_dir / f"CV_{_slug(master.get('name', 'cv'))}_{lang}.pdf")
+    render_letter(doc, letter, row["company"], row["title"], out_dir / "cover_letter.pdf")
+    (out_dir / "cover_letter.txt").write_text(letter, encoding="utf-8")
+    (out_dir / "tailoring.json").write_text(json.dumps(tailored, ensure_ascii=False, indent=1))
+    return cv_pdf
+
+
+def rerender(store: Store, settings: Settings, llm: LLM | None) -> list[int]:
+    """Rebuild the PDFs of every prepared application with the current templates and master CV.
+
+    Reuses the saved tailoring when there is one; older applications are tailored again.
+    The cover letter text and the form answers are kept as they are.
+    """
+    master = load_master(settings.master_cv_path)
+    done = []
+    for row in store.by_status(Status.READY, Status.NEEDS_YOU):
+        saved = _app_dir(settings, row["id"]) / "tailoring.json"
+        try:
+            if saved.exists():
+                tailored = json.loads(saved.read_text(encoding="utf-8"))
+            else:
+                lang = row["language"] or "en"
+                tailored = tailor(master, job_from_row(row), lang, llm, settings.tailor_model)
+            cv_pdf = render_application(row, master, tailored, row["cover_letter"], settings)
+        except Exception:  # noqa: BLE001 - one bad application never stops the rest
+            log.exception("re-rendering job %s failed", row["id"])
+            continue
+        store.update(row["id"], cv_path=str(cv_pdf), cv_diff=cv_diff(master, tailored))
+        done.append(row["id"])
+    return done
 
 
 def _slug(text: str) -> str:

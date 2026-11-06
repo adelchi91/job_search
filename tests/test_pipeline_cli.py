@@ -101,3 +101,28 @@ def test_post_digest_runs_configured_command(settings, tmp_path):
     assert out.read_text() == "# digest"
     settings.digest_command = ["/nonexistent/command"]
     assert post_digest(settings, "x") is False
+
+
+def test_rerender_rebuilds_pdfs_from_saved_or_fresh_tailoring(settings, store):
+    from pathlib import Path
+
+    from job_hunter.pipeline import rerender
+
+    jobs = [make_job(source_id=str(i), title=f"Forward Deployed Engineer {i}") for i in range(2)]
+    llm = FakeLLM({"Target roles": {"score": 90, "reason": "fit"}, "Language": {"letter": "Hi"}})
+    with make_client(fixtures.transport()) as c:
+        run(settings, store, c, llm, [ListCollector(jobs)])
+    first, second = store.by_status(Status.READY)
+    saved = Path(first["cv_path"]).parent / "tailoring.json"
+    assert saved.exists()
+    (Path(second["cv_path"]).parent / "tailoring.json").unlink()  # an older application
+    Path(first["cv_path"]).unlink()
+    assert sorted(rerender(store, settings, None)) == sorted([first["id"], second["id"]])
+    assert Path(store.get(first["id"])["cv_path"]).exists()
+    assert store.get(second["id"])["cover_letter"] == "Hi"
+    assert (Path(second["cv_path"]).parent / "tailoring.json").exists()
+
+
+def test_rerender_command(settings, store, capsys):
+    assert cli.main(["--data", str(settings.data_dir), "rerender", "--no-llm"]) == 0
+    assert "Re-rendered 0" in capsys.readouterr().out
