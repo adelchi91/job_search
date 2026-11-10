@@ -19,6 +19,5 @@ RUN uv sync --frozen --no-dev --extra llm --extra apply --extra boards
 # /data is the Railway volume: allowlist.yaml and users/<name>/ live there
 # JOB_HUNTER_REQUIRE_AUTH: never serve the open single-user mode on a public URL
 ENV DATA_DIR=/data JOB_HUNTER_HEADLESS=1 HOST=0.0.0.0 JOB_HUNTER_REQUIRE_AUTH=1
-VOLUME ["/data"]
 EXPOSE 8000
 CMD ["sh", "-c", "job-hunter --data \"$DATA_DIR\" serve --host 0.0.0.0"]
