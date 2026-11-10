@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Admin · job hunter{% endblock %}
+{% block body %}
+<div class="grid2">
+  <section class="panel">
+    <h3>Who can sign in</h3>
+    <table>
+      <tr><th>Email</th><th>Name</th><th></th></tr>
+      {% for p in people %}
+      <tr>
+        <td>{{ p.email }} {% if p.admin %}<span class="badge admin">admin</span>{% endif %}</td>
+        <td>{{ p.name }}</td>
+        <td style="text-align:right">{% if not p.admin %}
+          <form method="post" action="/admin/people/remove" onsubmit="return confirm('Remove {{ p.email }}? Their files are kept.')">
+            <input type="hidden" name="email" value="{{ p.email }}"><button class="link">Remove</button>
+          </form>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <h4>Invite someone</h4>
+    <form method="post" action="/admin/people" class="row">
+      <input type="email" name="email" placeholder="their Google email" required style="flex:2">
+      <input type="text" name="name" placeholder="name (optional)" style="flex:1">
+      <button class="primary">Add</button>
+    </form>
+    <p class="muted">They sign in with that Google account. Each person gets their own folder, board and settings.</p>
+  </section>
+
+  <section class="panel">
+    <h3>Daily run</h3>
+    {% if scheduled %}
+    <p>Next run: <strong>{{ next_at.strftime('%A %d %B, %H:%M') if next_at else 'starting…' }}</strong> (Paris time, Monday–Friday)</p>
+    {% else %}
+    <p class="muted">The scheduler is off (set JOB_HUNTER_SCHEDULER=1 to run every weekday at 08:00).</p>
+    {% endif %}
+    <p class="muted">Digest emails: {{ 'on' if mail else 'off (no SMTP_HOST set)' }}</p>
+    <form method="post" action="/admin/run">
+      <button class="primary" {{ 'disabled' if running }}>{{ 'Running…' if running else 'Run now for everyone' }}</button>
+    </form>
+    {% if last %}
+    <h4>Last run</h4>
+    <table>
+      <tr><th>Who</th><th>Result</th><th></th></tr>
+      {% for r in last %}<tr><td>{{ r.email }}</td><td>{{ r.status }}</td><td class="muted">{{ r.detail }}</td></tr>{% endfor %}
+    </table>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

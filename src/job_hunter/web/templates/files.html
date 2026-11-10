@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}My files · job hunter{% endblock %}
+{% block body %}
+<div class="grid2" style="grid-template-columns: 3fr 2fr">
+  <section class="panel">
+    <h3>Settings</h3>
+    <nav class="tabs">
+      {% for name, label in tabs %}<a href="/files?edit={{ name }}" class="{{ 'on' if name == edit }}">{{ label }}</a>{% endfor %}
+    </nav>
+    {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
+    <form method="post" action="/files/yaml/{{ edit }}">
+      <textarea class="code" name="text" spellcheck="false">{{ text }}</textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="primary">Save {{ edit }}</button>
+        <span class="muted">Checked before saving · {{ versions }} earlier version{{ '' if versions == 1 else 's' }} kept</span>
+      </div>
+    </form>
+    {% if versions %}
+    <form method="post" action="/files/yaml/{{ edit }}/undo" style="margin-top:8px"
+          onsubmit="return confirm('Restore the previous version of {{ edit }}?')">
+      <button>Undo last save</button>
+    </form>
+    {% endif %}
+  </section>
+
+  <div>
+    <section class="panel">
+      <h3>Master CV from a PDF</h3>
+      {% if draft %}
+      <p class="muted">A draft is waiting. Check it, edit it if needed, then apply it.</p>
+      <form method="post" action="/files/cv-import/apply">
+        <textarea class="code" name="text" spellcheck="false" style="min-height:300px">{{ draft }}</textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="primary">Apply as master CV</button>
+        </div>
+      </form>
+      <form method="post" action="/files/cv-import/discard" style="margin-top:8px"><button class="danger">Discard draft</button></form>
+      {% else %}
+      <p class="muted">Upload your CV as a PDF: it is kept in your <em>cv</em> folder and turned into a draft master CV for you to review.</p>
+      <form method="post" action="/files/cv-import" enctype="multipart/form-data" class="row">
+        <input type="file" name="upload" accept="application/pdf" required>
+        <button class="primary">Draft from PDF</button>
+      </form>
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <h3>Documents</h3>
+      <form method="post" action="/files/docs" enctype="multipart/form-data" class="row" style="margin-bottom:12px">
+        <select name="folder" style="width:auto">{% for f in folders %}<option value="{{ f }}">{{ f }}</option>{% endfor %}</select>
+        <input type="file" name="upload" required>
+        <button>Upload</button>
+      </form>
+      {% for folder in folders %}
+      <h4 style="margin:12px 0 4px">{{ folder }} <span class="badge">{{ docs[folder]|length }}</span></h4>
+      <table>
+        {% for d in docs[folder] %}
+        <tr>
+          <td><a href="/files/docs/{{ folder }}/{{ d.name|urlencode }}">{{ d.name }}</a></td>
+          <td class="muted">{{ (d.size / 1024)|round(0)|int }} KB</td>
+          <td style="text-align:right">
+            <form method="post" action="/files/docs/{{ folder }}/{{ d.name|urlencode }}/delete"
+                  onsubmit="return confirm('Delete {{ d.name }}?')"><button class="link">Delete</button></form>
+          </td>
+        </tr>
+        {% else %}<tr><td class="muted">Empty</td></tr>{% endfor %}
+      </table>
+      {% endfor %}
+    </section>
+
+    <section class="panel">
+      <h3>Move your data</h3>
+      <p class="muted">Download everything (settings, jobs, CVs, documents) as one zip, or bring a folder from another machine.</p>
+      <p><a class="btn" href="/files/export.zip">Download my data (.zip)</a></p>
+      <form method="post" action="/files/import" enctype="multipart/form-data" class="row"
+            onsubmit="return confirm('Files in the zip replace your current ones. Continue?')">
+        <input type="file" name="upload" accept=".zip,application/zip" required>
+        <button>Import zip</button>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

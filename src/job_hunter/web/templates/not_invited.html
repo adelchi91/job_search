@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Not invited · job hunter{% endblock %}
+{% block body %}
+<div class="center">
+  <div class="signin">
+    <h1>Not on the list yet</h1>
+    <p class="muted">{% if email %}<strong>{{ email }}</strong> has not been invited.{% else %}That Google account could not be verified.{% endif %}
+      Ask the admin to add you, then sign in again.</p>
+    <a class="btn" href="/login">Use another account</a>
+  </div>
+</div>
+{% endblock %}

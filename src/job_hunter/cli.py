@@ -1,9 +1,10 @@
-"""Command line: `job-hunter init | run | serve | schedule`."""
+"""Command line: `job-hunter init | run | run-all | serve | export | schedule`."""
 
 from __future__ import annotations
 
 import argparse
 import logging
+import os
 import shutil
 import subprocess
 import sys
@@ -96,14 +97,55 @@ def cmd_rerender(args: argparse.Namespace) -> int:
     return 0
 
 
+def _app_from_env(root: Path):
+    """The web app as configured by environment variables (see README, Deploy)."""
+    from job_hunter.daily import DailyScheduler, run_everyone
+    from job_hunter.mailer import Mailer, SmtpConfig
+    from job_hunter.web.app import create_app
+    from job_hunter.web.auth import AuthConfig
+
+    auth = AuthConfig.from_env()
+    smtp = SmtpConfig.from_env()
+    mailer = Mailer(smtp) if smtp else None
+    scheduler = None
+    if os.environ.get("JOB_HUNTER_SCHEDULER") == "1":
+        directory = auth.directory(root)
+        scheduler = DailyScheduler(lambda: run_everyone(directory, get_llm(), mailer, auth.app_url))
+    return create_app(root, auth, mailer=mailer, scheduler=scheduler)
+
+
 def cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
 
-    from job_hunter.web.app import create_app
+    root = Path(args.data)
+    root.mkdir(parents=True, exist_ok=True)
+    app = _app_from_env(root)
+    uvicorn.run(app, host=args.host, port=args.port, proxy_headers=True, forwarded_allow_ips="*")
+    return 0
 
-    settings = load_settings(Path(args.data))
-    app = create_app(settings, Store(settings.db_path))
-    uvicorn.run(app, host="127.0.0.1", port=args.port)
+
+def cmd_run_all(args: argparse.Namespace) -> int:
+    """One pass for every allowed user, as the scheduler does it (server layout)."""
+    from job_hunter.daily import run_everyone
+    from job_hunter.mailer import Mailer, SmtpConfig
+    from job_hunter.web.auth import AuthConfig
+
+    auth = AuthConfig.from_env()
+    smtp = SmtpConfig.from_env()
+    results = run_everyone(
+        auth.directory(Path(args.data)), get_llm(), Mailer(smtp) if smtp else None, auth.app_url
+    )
+    for r in results:
+        print(f"{r.email}: {r.status} {r.detail}")
+    return 0 if all(r.status != "failed" for r in results) else 1
+
+
+def cmd_export(args: argparse.Namespace) -> int:
+    from job_hunter.userfiles import export_zip
+
+    out = Path(args.out)
+    out.write_bytes(export_zip(Path(args.data)))
+    print(f"wrote {out}: import it on the My files page of the deployed app")
     return 0
 
 
@@ -133,9 +175,16 @@ def parser() -> argparse.ArgumentParser:
     r.add_argument("--fixtures", action="store_true", help="replay recorded API responses")
     r.add_argument("--no-llm", action="store_true", help="use heuristics instead of Claude")
     r.set_defaults(func=cmd_run)
-    s = sub.add_parser("serve", help="start the tracker dashboard on localhost")
-    s.add_argument("--port", type=int, default=8000)
+    s = sub.add_parser("serve", help="start the tracker dashboard")
+    s.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
+    s.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8000")))
     s.set_defaults(func=cmd_serve)
+    sub.add_parser("run-all", help="run every allowed user's pipeline once").set_defaults(
+        func=cmd_run_all
+    )
+    e = sub.add_parser("export", help="zip the data dir, to import it on the deployed app")
+    e.add_argument("--out", default="job-hunter-data.zip")
+    e.set_defaults(func=cmd_export)
     rr = sub.add_parser("rerender", help="rebuild prepared CV/letter PDFs with the current look")
     rr.add_argument("--no-llm", action="store_true", help="heuristic tailoring for old items")
     rr.set_defaults(func=cmd_rerender)
