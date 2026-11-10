@@ -22,6 +22,17 @@ from job_hunter.users import Directory, User, ensure_user_dir, slug_for
 UTC = ZoneInfo("UTC")
 
 
+# --- auth config ---------------------------------------------------------------
+def test_server_refuses_open_mode_when_auth_is_required():
+    from job_hunter.web.auth import AuthConfig
+
+    assert AuthConfig.from_env({}).local
+    with pytest.raises(RuntimeError, match="GOOGLE_CLIENT_ID"):
+        AuthConfig.from_env({"JOB_HUNTER_REQUIRE_AUTH": "1"})
+    with pytest.raises(RuntimeError, match="ADMIN_EMAIL"):
+        AuthConfig.from_env({"GOOGLE_CLIENT_ID": "id"})
+
+
 # --- users ---------------------------------------------------------------------
 def test_slug_is_stable_safe_and_case_blind():
     assert slug_for("Jane.Doe+jobs@Example.com") == slug_for(" jane.doe+jobs@example.com ")

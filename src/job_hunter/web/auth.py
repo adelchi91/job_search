@@ -43,6 +43,8 @@ class AuthConfig:
             google_client_secret=env.get("GOOGLE_CLIENT_SECRET", ""),
             app_url=env.get("APP_URL", "").rstrip("/"),
         )
+        if cfg.local and env.get("JOB_HUNTER_REQUIRE_AUTH") == "1":
+            raise RuntimeError("this server needs Google sign-in: set GOOGLE_CLIENT_ID")
         if not cfg.local and not (cfg.admin_email and cfg.session_secret):
             raise RuntimeError("Google sign-in needs ADMIN_EMAIL and SESSION_SECRET as well")
         cfg.session_secret = cfg.session_secret or secrets.token_urlsafe(32)
