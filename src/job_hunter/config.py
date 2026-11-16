@@ -43,6 +43,8 @@ class Settings:
     max_tailored_per_run: int = 15
     score_model: str = "claude-haiku-5-5"
     tailor_model: str = "claude-sonnet-5-5"
+    # Replace employer names with [EMPLOYER_n] in LLM prompts (mapped back in the output).
+    anonymise_employers: bool = False
     jobspy_sites: list[str] = field(default_factory=lambda: ["linkedin", "indeed", "glassdoor"])
     # argv that receives the digest markdown as its last argument after a live run
     # (e.g. rev0 comment 3 --author board -m); empty means the digest stays a file.
