@@ -47,6 +47,8 @@ class Settings:
     # argv that receives the digest markdown as its last argument after a live run
     # (e.g. rev0 comment 3 --author board -m); empty means the digest stays a file.
     digest_command: list[str] = field(default_factory=list)
+    # Free-tier caps per LLM provider: {provider: {"default" | model: {rpm, rpd, tpm, ...}}}.
+    llm_limits: dict = field(default_factory=dict)
     profile: Profile = field(default_factory=Profile)
     companies: list[Company] = field(default_factory=list)
     data_dir: Path = Path("data")
@@ -75,7 +77,9 @@ def load_settings(data_dir: Path | None = None) -> Settings:
     data_dir = Path(data_dir or "data")
     cfg_path = data_dir / "config.yaml"
     comp_path = data_dir / "companies.yaml"
-    cfg = _read_yaml(cfg_path if cfg_path.exists() else DEFAULTS_DIR / "config.yaml")
+    defaults = _read_yaml(DEFAULTS_DIR / "config.yaml")
+    cfg = _read_yaml(cfg_path) if cfg_path.exists() else dict(defaults)
+    cfg.setdefault("llm_limits", defaults.get("llm_limits") or {})
     companies = load_companies(comp_path if comp_path.exists() else DEFAULTS_DIR / "companies.yaml")
     profile = Profile(**cfg.pop("profile", {}))
     return Settings(**cfg, profile=profile, companies=companies, data_dir=data_dir)

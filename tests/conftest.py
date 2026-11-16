@@ -28,6 +28,13 @@ class FakeLLM:
         raise KeyError("no canned reply")
 
 
+@pytest.fixture(autouse=True)
+def _no_free_tier_keys(monkeypatch):
+    """Tests opt in to Groq / Mistral explicitly; a developer's own keys never leak in."""
+    for var in ("GROQ_API_KEY", "MISTRAL_API_KEY", "GROQ_MODEL", "MISTRAL_MODEL"):
+        monkeypatch.delenv(var, raising=False)
+
+
 @pytest.fixture
 def settings(tmp_path: Path):
     init(tmp_path)
