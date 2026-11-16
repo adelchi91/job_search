@@ -86,6 +86,9 @@ max_open_per_company: 2
 max_tailored_per_run: 15
 score_model: claude-haiku-5-5
 tailor_model: claude-sonnet-5-5
+# Your name and contact details never go to the LLM. Set this to true to also replace
+# your employers' names with [EMPLOYER_n] tokens in prompts (real names stay in the PDFs).
+anonymise_employers: false
 jobspy_sites: [linkedin, indeed, glassdoor]
 profile:
   name: ""

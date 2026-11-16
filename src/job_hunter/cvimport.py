@@ -13,6 +13,7 @@ import yaml
 
 from job_hunter.config import DEFAULTS_DIR
 from job_hunter.llm import LLM
+from job_hunter.tailor.privacy import scrub_pii
 from job_hunter.userfiles import FileError, save_yaml, validate_yaml
 
 DRAFT = "master_cv.draft.yaml"
@@ -55,7 +56,10 @@ def draft_master(text: str, llm: LLM | None, model: str) -> str:
     if llm is None:
         raise FileError("no LLM is configured on the server (set ANTHROPIC_API_KEY)")
     example = (DEFAULTS_DIR / "master_cv.yaml").read_text(encoding="utf-8")
-    data = llm.json(PROMPT.format(example=example, text=text), model=model, system=SYSTEM)
+    # E-mails and phone numbers never leave the machine: the draft shows [EMAIL]/[PHONE]
+    # and the user fills them in before pressing Apply.
+    prompt = PROMPT.format(example=example, text=scrub_pii(text))
+    data = llm.json(prompt, model=model, system=SYSTEM)
     out = yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=100)
     validate_yaml("master_cv.yaml", out)
     return "# Drafted from your PDF. Check every line, then press Apply.\n" + out
