@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Job hunter{% endblock %}</title>
 <link rel="stylesheet" href="/static/midnight.css">
+{% if me %}<meta name="csrf-token" content="{{ csrf_token() }}">{% endif %}
 </head>
 <body>
 <header class="top">
@@ -19,7 +20,7 @@
   <div class="me">
     <span class="chip"><span class="avatar">{{ me.label[:1]|upper }}</span>{{ me.label }}</span>
     {% if not local %}
-    <form method="post" action="/logout"><button class="link">Sign out</button></form>
+    <form method="post" action="/logout">{{ csrf_field() }}<button class="link">Sign out</button></form>
     {% endif %}
   </div>
   {% endif %}

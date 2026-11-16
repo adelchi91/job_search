@@ -18,11 +18,11 @@
   <div class="row">
     {% if job.status == Status.READY %}
     <form method="post" action="/jobs/{{ job.id }}/send"
-          onsubmit="return confirm('Fill and submit the application to {{ job.company }} now?')">
+          onsubmit="return confirm('Fill and submit the application to {{ job.company }} now?')">{{ csrf_field() }}
       <button class="primary">Approve &amp; send</button>
     </form>
     {% endif %}
-    <form method="post" action="/jobs/{{ job.id }}/status" class="row">
+    <form method="post" action="/jobs/{{ job.id }}/status" class="row">{{ csrf_field() }}
       <select name="status" style="width:auto">{% for s in moves %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select>
       <button>Move</button>
     </form>
@@ -38,7 +38,7 @@
     {% else %}<p class="muted">Not tailored yet.</p>{% endif %}
   </div>
   <div class="panel">
-    <form method="post" action="/jobs/{{ job.id }}/answers">
+    <form method="post" action="/jobs/{{ job.id }}/answers">{{ csrf_field() }}
       <h3>Form answers</h3>
       {% for q, a in job.answers.items() %}
       <label>{{ q }}{% if not a %} <strong style="color:var(--needs)">(needs your answer)</strong>{% endif %}

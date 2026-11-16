@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -58,3 +59,10 @@ def make_job(**kw) -> Job:
     )
     base.update(kw)
     return Job(**base)
+
+
+def arm_csrf(client, page: str = "/") -> str:
+    """Read the session's CSRF token from a page and send it on every later request."""
+    token = re.search(r'name="csrf-token" content="([^"]+)"', client.get(page).text).group(1)
+    client.headers["X-CSRF-Token"] = token
+    return token

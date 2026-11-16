@@ -17,6 +17,7 @@ from job_hunter.collectors.boards import JobspyCollector
 from job_hunter.config import DEFAULTS_DIR, Settings, load_settings
 from job_hunter.db import Store
 from job_hunter.llm import get_llm
+from job_hunter.llm_router import make_llm_factory
 from job_hunter.tailor.cv import load_master
 
 DEFAULT_FILES = ("config.yaml", "companies.yaml", "master_cv.yaml")
@@ -109,8 +110,8 @@ def _app_from_env(root: Path):
     mailer = Mailer(smtp) if smtp else None
     scheduler = None
     if os.environ.get("JOB_HUNTER_SCHEDULER") == "1":
-        directory = auth.directory(root)
-        scheduler = DailyScheduler(lambda: run_everyone(directory, get_llm(), mailer, auth.app_url))
+        directory, llms = auth.directory(root), make_llm_factory(auth.fernet(root))
+        scheduler = DailyScheduler(lambda: run_everyone(directory, llms, mailer, auth.app_url))
     return create_app(root, auth, mailer=mailer, scheduler=scheduler)
 
 
@@ -132,9 +133,10 @@ def cmd_run_all(args: argparse.Namespace) -> int:
 
     auth = AuthConfig.from_env()
     smtp = SmtpConfig.from_env()
-    results = run_everyone(
-        auth.directory(Path(args.data)), get_llm(), Mailer(smtp) if smtp else None, auth.app_url
-    )
+    root = Path(args.data)
+    llms = make_llm_factory(auth.fernet(root))
+    mailer = Mailer(smtp) if smtp else None
+    results = run_everyone(auth.directory(root), llms, mailer, auth.app_url)
     for r in results:
         print(f"{r.email}: {r.status} {r.detail}")
     return 0 if all(r.status != "failed" for r in results) else 1

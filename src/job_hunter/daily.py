@@ -18,6 +18,7 @@ from job_hunter.collectors.base import make_client
 from job_hunter.config import load_settings
 from job_hunter.db import Store
 from job_hunter.llm import LLM
+from job_hunter.llm_router import LLMFactory
 from job_hunter.mailer import Mailer
 from job_hunter.tailor.cv import load_master
 from job_hunter.users import Directory, User, ensure_user_dir
@@ -83,15 +84,22 @@ def run_user(
     return UserRun(user.email, "done", note + (", emailed" if sent else ""))
 
 
-def run_everyone(directory: Directory, llm: LLM | None, mailer=None, app_url="", **kw) -> list:
-    """One pass over every allowed user. Returns [] if another run holds the lock."""
+def run_everyone(
+    directory: Directory, llm_factory: LLMFactory | None, mailer=None, app_url="", **kw
+) -> list:
+    """One pass over every allowed user, each on their own LLM (llm_router.llm_for).
+
+    Returns [] if another run holds the lock. llm_factory=None runs on heuristics only.
+    """
     if not RUN_LOCK.acquire(blocking=False):
         return []
     try:
         results = []
         for user in directory.users():
             try:
-                results.append(run_user(user, directory.user_dir(user), llm, mailer, app_url, **kw))
+                data_dir = directory.user_dir(user)
+                llm = llm_factory(user, data_dir) if llm_factory else None
+                results.append(run_user(user, data_dir, llm, mailer, app_url, **kw))
             except Exception as exc:  # noqa: BLE001 - one user's failure never stops the rest
                 log.exception("daily run for %s failed", user.email)
                 results.append(UserRun(user.email, "failed", str(exc)[:300]))

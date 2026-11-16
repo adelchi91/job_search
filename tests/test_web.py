@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from conftest import make_job
+from conftest import arm_csrf, make_job
 from fastapi.testclient import TestClient
 
 from job_hunter.applier import ApplyResult
@@ -34,7 +34,9 @@ def setup(settings, store, tmp_path, result=OK):
         answers={"Why us?": ""},
     )
     store.set_status(job_id, Status.NEEDS_YOU, "1 open question")
-    return TestClient(create_app(tmp_path, AuthConfig(), fake_apply)), job_id, calls
+    client = TestClient(create_app(tmp_path, AuthConfig(), fake_apply))
+    arm_csrf(client)
+    return client, job_id, calls
 
 
 def test_board_and_detail_render(settings, store, tmp_path):
