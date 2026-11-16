@@ -9,16 +9,19 @@ from collections.abc import Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import httpx
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from job_hunter import applier
+from job_hunter.keystore import KeyStore, default_keystore
 from job_hunter.llm import get_llm
 from job_hunter.models import Status
 from job_hunter.routing import AUTO_ATS
 from job_hunter.userfiles import resolve_in
+from job_hunter.web import ai_settings
 from job_hunter.web.auth import SESSION_DAYS, AuthConfig, install_auth, make_oauth
 from job_hunter.web.workspace import Stores, Workspace, render, workspace
 
@@ -194,6 +197,8 @@ def create_app(
     scheduler=None,
     llm_factory=get_llm,
     mailer=None,
+    keystore_factory: Callable[[Path], KeyStore] = default_keystore,
+    http_client: httpx.Client | None = None,
 ) -> FastAPI:
     """root is the data dir in local mode, or the volume holding allowlist.yaml + users/."""
     from job_hunter.web.admin import install_admin
@@ -208,6 +213,7 @@ def create_app(
     state.apply_fn, state.llm_factory, state.mailer = apply_fn, llm_factory, mailer
     state.oauth = oauth if oauth is not None or auth.local else make_oauth(auth)
     state.scheduler = scheduler
+    state.keystore_factory, state.http_client = keystore_factory, http_client
     app.add_middleware(
         SessionMiddleware,
         secret_key=auth.session_secret or "local-dev-only",
@@ -222,4 +228,5 @@ def create_app(
     _actions(app)
     install_files(app)
     install_admin(app)
+    ai_settings.register(app)
     return app

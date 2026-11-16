@@ -21,8 +21,9 @@ from job_hunter.digest import build_digest, write_digest
 from job_hunter.filters import keep
 from job_hunter.llm import LLM
 from job_hunter.models import Job, Status
+from job_hunter.providers import LLMRouter
 from job_hunter.routing import route
-from job_hunter.scoring import score_job
+from job_hunter.scoring import detect_language, score_job
 from job_hunter.tailor.cover import cover_letter
 from job_hunter.tailor.cv import build_document, cv_diff, load_master, tailor
 from job_hunter.tailor.privacy import redact_master
@@ -54,17 +55,16 @@ def ingest(store: Store, jobs: list[Job], settings: Settings) -> tuple[int, list
     return kept, new_ids
 
 
-def score_new(store: Store, master: dict, settings: Settings, llm: LLM | None) -> None:
+LLMArg = LLMRouter | LLM | None
+
+
+def score_new(store: Store, master: dict, settings: Settings, llm: LLMArg) -> None:
+    router = LLMRouter.wrap(llm, settings)
     cv_text = yaml.safe_dump(redact_master(master), allow_unicode=True, sort_keys=False)
     for row in store.by_status(Status.NEW):
-        out = score_job(
-            job_from_row(row),
-            cv_text,
-            settings.roles,
-            llm,
-            settings.score_model,
-            settings.role_keywords,
-        )
+        job = job_from_row(row)
+        backend, model = router.for_scoring(detect_language(job))
+        out = score_job(job, cv_text, settings.roles, backend, model, settings.role_keywords)
         status = Status.MATCH if out["score"] >= settings.fit_threshold else Status.LOW_FIT
         store.update(
             row["id"], score=out["score"], score_reason=out["reason"], language=out["language"]
@@ -72,17 +72,14 @@ def score_new(store: Store, master: dict, settings: Settings, llm: LLM | None) -
         store.set_status(row["id"], status, f"fit {out['score']}")
 
 
-def prepare(
-    store: Store, row: dict, master: dict, settings: Settings, llm: LLM | None, client
-) -> None:
+def prepare(store: Store, row: dict, master: dict, settings: Settings, llm: LLMArg, client) -> None:
     """Tailor CV + letter for one matched job, render PDFs and route it."""
     job = job_from_row(row)
     lang = row["language"] or "en"
+    backend, model = LLMRouter.wrap(llm, settings).for_tailoring(lang)
     anonymise = settings.anonymise_employers
-    tailored = tailor(master, job, lang, llm, settings.tailor_model, anonymise_employers=anonymise)
-    letter = cover_letter(
-        master, tailored, job, llm, settings.tailor_model, anonymise_employers=anonymise
-    )
+    tailored = tailor(master, job, lang, backend, model, anonymise_employers=anonymise)
+    letter = cover_letter(master, tailored, job, backend, model, anonymise_employers=anonymise)
     cv_pdf = render_application(row, master, tailored, letter, settings)
     r = route(job, settings.profile, client)
     answers = {**r.answers, **{q: "" for q in r.open_questions}}
@@ -118,13 +115,14 @@ def render_application(
     return cv_pdf
 
 
-def rerender(store: Store, settings: Settings, llm: LLM | None) -> list[int]:
+def rerender(store: Store, settings: Settings, llm: LLMArg) -> list[int]:
     """Rebuild the PDFs of every prepared application with the current templates and master CV.
 
     Reuses the saved tailoring when there is one; older applications are tailored again.
     The cover letter text and the form answers are kept as they are.
     """
     master = load_master(settings.master_cv_path)
+    router = LLMRouter.wrap(llm, settings)
     done = []
     for row in store.by_status(Status.READY, Status.NEEDS_YOU):
         saved = _app_dir(settings, row["id"]) / "tailoring.json"
@@ -133,12 +131,13 @@ def rerender(store: Store, settings: Settings, llm: LLM | None) -> list[int]:
                 tailored = json.loads(saved.read_text(encoding="utf-8"))
             else:
                 lang = row["language"] or "en"
+                backend, model = router.for_tailoring(lang)
                 tailored = tailor(
                     master,
                     job_from_row(row),
                     lang,
-                    llm,
-                    settings.tailor_model,
+                    backend,
+                    model,
                     anonymise_employers=settings.anonymise_employers,
                 )
             cv_pdf = render_application(row, master, tailored, row["cover_letter"], settings)
@@ -155,7 +154,7 @@ def _slug(text: str) -> str:
 
 
 def prepare_matches(
-    store: Store, master: dict, settings: Settings, llm: LLM | None, client
+    store: Store, master: dict, settings: Settings, llm: LLMArg, client
 ) -> list[int]:
     done: list[int] = []
     for row in store.by_status(Status.MATCH):
@@ -181,10 +180,11 @@ def run(
     settings: Settings,
     store: Store,
     client: httpx.Client,
-    llm: LLM | None,
+    llm: LLMArg,
     collectors: list[Collector] | None = None,
 ) -> RunResult:
     master = load_master(settings.master_cv_path)
+    llm = LLMRouter.wrap(llm, settings)
     jobs, report = run_collectors(collectors or build_collectors(settings), client)
     kept, new_ids = ingest(store, jobs, settings)
     log.info("collected %d, kept %d, new %d", len(jobs), kept, len(new_ids))

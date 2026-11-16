@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Settings · AI provider{% endblock %}
+{% block body %}
+<h1>AI provider</h1>
+<p class="muted">Free AI scoring and tailoring with your own Groq and/or Mistral key.
+Without a key the tracker uses Claude if it is available, otherwise keyword heuristics.</p>
+
+{% if note %}<p class="flash ok">{{ note }}</p>{% endif %}
+{% if result %}
+<p class="flash {{ 'ok' if result.ok else 'error' }}" id="test-result">
+  <strong>{{ result.label }}:</strong> {{ result.message }}
+</p>
+{% endif %}
+
+<div class="panel">
+  <h2>Routing</h2>
+  <p>{{ routing }}</p>
+</div>
+
+<div class="grid2">
+{% for p in providers %}
+<div class="panel" id="provider-{{ p.name }}">
+  <h2>{{ p.label }}</h2>
+  <p class="muted">Scoring: <code>{{ p.score_model }}</code> · Tailoring: <code>{{ p.tailor_model }}</code></p>
+  {% if p.masked %}
+  <p>Key <code>{{ p.masked }}</code> <span class="muted">({{ p.source }})</span></p>
+  {% else %}
+  <p class="muted">No key yet. Get one at <a href="{{ p.console }}" target="_blank" rel="noopener">{{ p.console }}</a>.</p>
+  {% endif %}
+  <form method="post" action="/settings/ai/{{ p.name }}/key">
+    <div class="keyrow">
+      <input type="password" name="key" placeholder="Paste your {{ p.label }} API key" autocomplete="off">
+      <button class="primary" type="submit">Save</button>
+      <button type="submit" formaction="/settings/ai/{{ p.name }}/test">Test connection</button>
+    </div>
+  </form>
+  {% if p.source == "saved in your keys.yaml" %}
+  <form method="post" action="/settings/ai/{{ p.name }}/remove">
+    <button type="submit">Remove saved key</button>
+  </form>
+  {% endif %}
+</div>
+{% endfor %}
+</div>
+
+<div class="panel">
+  <h2>Setup guide</h2>
+  {% for heading, steps in guide %}
+  <h3>{{ heading }}</h3>
+  <ol>{% for step in steps %}<li>{{ step | urlize(target="_blank") }}</li>{% endfor %}</ol>
+  {% endfor %}
+</div>
+{% endblock %}
