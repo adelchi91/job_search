@@ -40,10 +40,15 @@
   .reason { padding:8px 10px; border-radius:6px; background:#fffbeb; border:1px solid #fde68a; }
   .desc { white-space:pre-wrap; max-height:360px; overflow:auto; color:#374151; }
   .muted { color:var(--muted); }
+  header a.nav { font-weight:400; color:#cbd5e1; }
+  .ok { padding:8px 10px; border-radius:6px; background:#f0fdf4; border:1px solid #bbf7d0; }
+  .err { padding:8px 10px; border-radius:6px; background:#fef2f2; border:1px solid #fecaca; }
+  .keyrow { display:flex; gap:8px; align-items:center; margin:8px 0; }
+  .keyrow input { flex:1; }
 </style>
 </head>
 <body>
-<header><a href="/">Job tracker</a>{% block header %}{% endblock %}</header>
+<header><a href="/">Job tracker</a><a href="/settings" class="nav">Settings</a>{% block header %}{% endblock %}</header>
 <main>{% block body %}{% endblock %}</main>
 </body>
 </html>

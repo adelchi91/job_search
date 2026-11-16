@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 
+import httpx
 from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -12,8 +13,10 @@ from fastapi.templating import Jinja2Templates
 from job_hunter import applier
 from job_hunter.config import Settings
 from job_hunter.db import Store
+from job_hunter.keystore import KeyStore, default_keystore
 from job_hunter.models import Status
 from job_hunter.routing import AUTO_ATS
+from job_hunter.web import ai_settings
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
@@ -131,8 +134,17 @@ def _actions(app: FastAPI, settings: Settings, store: Store, apply_fn: ApplyFn) 
         return _back(job_id)
 
 
-def create_app(settings: Settings, store: Store, apply_fn: ApplyFn = applier.apply) -> FastAPI:
+def create_app(
+    settings: Settings,
+    store: Store,
+    apply_fn: ApplyFn = applier.apply,
+    keystore: KeyStore | None = None,
+    http_client: httpx.Client | None = None,
+) -> FastAPI:
     app = FastAPI(title="job-hunter")
     _pages(app, store)
     _actions(app, settings, store, apply_fn)
+    ai_settings.register(
+        app, TEMPLATES, settings, keystore or default_keystore(settings.data_dir), http_client
+    )
     return app

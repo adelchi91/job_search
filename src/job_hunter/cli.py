@@ -15,7 +15,8 @@ from job_hunter.collectors.base import make_client
 from job_hunter.collectors.boards import JobspyCollector
 from job_hunter.config import DEFAULTS_DIR, Settings, load_settings
 from job_hunter.db import Store
-from job_hunter.llm import get_llm
+from job_hunter.keystore import default_keystore
+from job_hunter.providers import LLMRouter, build_router
 from job_hunter.tailor.cv import load_master
 
 DEFAULT_FILES = ("config.yaml", "companies.yaml", "master_cv.yaml")
@@ -62,13 +63,19 @@ def post_digest(settings: Settings, digest: str) -> bool:
     return done.returncode == 0
 
 
+def _router(settings: Settings, no_llm: bool) -> LLMRouter:
+    """Groq / Mistral with the user's keys, else Claude, else heuristics."""
+    return LLMRouter() if no_llm else build_router(settings, default_keystore(settings.data_dir))
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     base = Path(args.data)
     if args.dry_run:
         settings, llm = _dry_run_settings(base), None
     else:
         init(base)
-        settings, llm = load_settings(base), (None if args.no_llm else get_llm())
+        settings = load_settings(base)
+        llm = _router(settings, args.no_llm)
     transport = fixtures.transport() if args.fixtures else None
     collectors = build_collectors(settings)
     if args.fixtures:  # jobspy does its own HTTP: not replayable from fixtures
@@ -90,7 +97,7 @@ def cmd_rerender(args: argparse.Namespace) -> int:
     from job_hunter.pipeline import rerender
 
     settings = load_settings(Path(args.data))
-    llm = None if args.no_llm else get_llm()
+    llm = _router(settings, args.no_llm)
     done = rerender(Store(settings.db_path), settings, llm)
     print(f"Re-rendered {len(done)} application(s).")
     return 0
@@ -131,7 +138,7 @@ def parser() -> argparse.ArgumentParser:
     r = sub.add_parser("run", help="collect, score, tailor and route today's jobs")
     r.add_argument("--dry-run", action="store_true", help="throwaway data dir, no LLM, no sends")
     r.add_argument("--fixtures", action="store_true", help="replay recorded API responses")
-    r.add_argument("--no-llm", action="store_true", help="use heuristics instead of Claude")
+    r.add_argument("--no-llm", action="store_true", help="heuristics instead of any LLM")
     r.set_defaults(func=cmd_run)
     s = sub.add_parser("serve", help="start the tracker dashboard on localhost")
     s.add_argument("--port", type=int, default=8000)

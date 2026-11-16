@@ -86,6 +86,15 @@ max_open_per_company: 2
 max_tailored_per_run: 15
 score_model: claude-haiku-5-5
 tailor_model: claude-sonnet-5-5
+# Free AI with your own key: set GROQ_API_KEY and/or MISTRAL_API_KEY (or paste them in the
+# dashboard, Settings -> AI provider). Both set: English jobs -> Groq, French jobs -> Mistral.
+# Everything below is optional; uncomment to override the defaults.
+# llm:
+#   groq: {score_model: openai/gpt-oss-20b, tailor_model: openai/gpt-oss-120b}
+#   mistral: {score_model: mistral-small-latest, tailor_model: mistral-large-latest}
+#   route: {en: groq, fr: mistral}
+#   prefer: byok        # or "claude": use Claude when available, your keys otherwise
+#   retry_429: true     # retry once on a rate limit before falling back to heuristics
 jobspy_sites: [linkedin, indeed, glassdoor]
 profile:
   name: ""
