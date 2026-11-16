@@ -86,7 +86,7 @@ def test_document_text_and_diff():
 def test_cover_letter_llm_and_template():
     t = default_tailoring(MASTER, "fr")
     letter = cover_letter(MASTER, t, make_job(), FakeLLM({"Language": {"letter": "Bonjour"}}), "m")
-    assert letter == "Bonjour"
+    assert letter.startswith("Bonjour") and letter.endswith(MASTER["name"])
     fallback = cover_letter(MASTER, t, make_job(), FakeLLM(fail=True), "m")
     assert "Mistral AI" in fallback and MASTER["name"] in fallback
 

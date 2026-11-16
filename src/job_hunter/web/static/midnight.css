@@ -104,7 +104,7 @@ details.side summary { cursor: pointer; }
 table { width: 100%; border-collapse: collapse; }
 td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-weight: 500; font-size: 12px; }
-input[type=text], input[type=email], select, textarea {
+input[type=text], input[type=email], input[type=password], select, textarea {
   width: 100%; font: inherit; color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
 }
@@ -112,6 +112,8 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); bo
 textarea { min-height: 160px; }
 textarea.code { min-height: 520px; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
 input[type=file] { color: var(--muted); }
+.keyrow { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+.keyrow input { flex: 1; }
 button, .btn {
   font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
   background: var(--panel-2); color: var(--ink); cursor: pointer; text-decoration: none;

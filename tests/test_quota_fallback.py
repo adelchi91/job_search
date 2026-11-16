@@ -151,9 +151,11 @@ def test_http_errors_are_recorded():
     token = usage._SINK.set(sink)
     try:
         with pytest.raises(httpx.ConnectError):
-            OpenAICompatLLM("groq", "https://down", "k", client).json("p", model="m")
+            OpenAICompatLLM("https://down", "k", provider="groq", client=client).json(
+                "p", model="m"
+            )
         with pytest.raises(httpx.HTTPStatusError):
-            OpenAICompatLLM("groq", "https://up", "k", client).json("p", model="m")
+            OpenAICompatLLM("https://up", "k", provider="groq", client=client).json("p", model="m")
     finally:
         usage._SINK.reset(token)
     assert recorded == ["error", "error"]
@@ -181,7 +183,7 @@ def test_quota_reached_falls_back_to_templates_and_no_job_fails(monkeypatch, set
     batch(settings, store, rerun)
     assert not store.quota_flagged(*Status)
     job = store.get(prepared[0]["id"])
-    assert job["score"] == 90 and job["cover_letter"] == "Dear team"
+    assert job["score"] == 90 and job["cover_letter"].startswith("Dear team")
 
 
 def test_widget_counts_match_a_batch_run(monkeypatch, settings, store, tmp_path):
@@ -217,7 +219,11 @@ def test_rerun_ai_keeps_flag_while_quota_is_out(settings, store, tmp_path):
     assert rerun_ai(store, job_id, master, settings, None, None) is False
     assert rerun_ai(store, job_id, master, settings, FakeLLM(REPLIES), None) is True
     job = store.get(job_id)
-    assert job["ai_fallback"] == "" and job["score"] == 90 and job["cover_letter"] == "Dear team"
+    assert (
+        job["ai_fallback"] == ""
+        and job["score"] == 90
+        and job["cover_letter"].startswith("Dear team")
+    )
 
 
 def test_web_rerun_button(settings, store, tmp_path):

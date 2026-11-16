@@ -36,7 +36,9 @@ def test_run_scores_tailors_caps_and_digests(settings, store):
     waiting = store.by_status(Status.MATCH)
     assert waiting and waiting[0]["route_reason"].startswith("Waiting")
     ready = store.by_status(Status.READY)[0]
-    assert ready["cover_letter"] == "Dear" and ready["cv_path"].endswith(".pdf")
+    assert ready["cover_letter"].startswith("Dear\n\nKind regards,") and ready["cv_path"].endswith(
+        ".pdf"
+    )
     assert result.digest_path.exists() and "Ready to send" in result.digest
 
 
@@ -119,7 +121,7 @@ def test_rerender_rebuilds_pdfs_from_saved_or_fresh_tailoring(settings, store):
     Path(first["cv_path"]).unlink()
     assert sorted(rerender(store, settings, None)) == sorted([first["id"], second["id"]])
     assert Path(store.get(first["id"])["cv_path"]).exists()
-    assert store.get(second["id"])["cover_letter"] == "Hi"
+    assert store.get(second["id"])["cover_letter"].startswith("Hi\n\nKind regards,")
     assert (Path(second["cv_path"]).parent / "tailoring.json").exists()
 
 

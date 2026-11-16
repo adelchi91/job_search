@@ -190,7 +190,7 @@ class Slot:
 
     name: str
     llm: object  # has .json(prompt, *, model, system) and raises RateLimited on 429
-    model: str
+    model: str  # "" = the model the caller asked for
     limiter: Limiter
     blocked_until: datetime | None = None
 
@@ -226,8 +226,10 @@ class QuotaGuard:
         *,
         sleep: Callable[[float], None] = time.sleep,
         wall: Callable[[], datetime] = lambda: datetime.now(UTC),
+        retry_429: bool = True,
     ):
         self.slots, self.sleep, self.wall = slots, sleep, wall
+        self.attempts = 2 if retry_429 else 1
         self.fallbacks = 0
 
     def json(self, prompt: str, *, model: str, system: str = "") -> dict:
@@ -235,22 +237,22 @@ class QuotaGuard:
             if slot.blocked(self.wall()):
                 continue
             try:
-                return self._call(slot, prompt, system)
+                return self._call(slot, prompt, system, model)
             except RateLimited as exc:
                 log.warning("%s out of quota, trying the next provider: %s", slot.name, exc)
         self.fallbacks += 1
         usage.note_quota_fallback()
         raise QuotaExceeded("every LLM provider is out of quota")
 
-    def _call(self, slot: Slot, prompt: str, system: str) -> dict:
+    def _call(self, slot: Slot, prompt: str, system: str, model: str = "") -> dict:
         estimate = estimate_tokens(system + prompt)
-        for attempt in (1, 2):
+        for attempt in range(1, self.attempts + 1):
             slot.limiter.acquire(estimate)
             try:
-                out = slot.llm.json(prompt, model=slot.model, system=system)
+                out = slot.llm.json(prompt, model=slot.model or model, system=system)
             except RateLimited as exc:
                 slot.note(exc, self.wall())
-                if attempt == 2 or slot.blocked(self.wall()):
+                if attempt == self.attempts or slot.blocked(self.wall()):
                     raise
                 self.sleep(min(exc.retry_after or RETRY_DEFAULT_S, RETRY_MAX_S))
                 continue
