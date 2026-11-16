@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from job_hunter.applier import ApplyResult
 from job_hunter.models import Status
 from job_hunter.web.app import create_app
+from job_hunter.web.auth import AuthConfig
 
 OK = ApplyResult(True, "Submitted")
 
@@ -15,8 +16,8 @@ OK = ApplyResult(True, "Submitted")
 def setup(settings, store, tmp_path, result=OK):
     calls = []
 
-    def fake_apply(url, profile, cv, letter, answers):
-        calls.append((url, cv, letter, answers))
+    def fake_apply(url, profile, cv, letter, answers, **kw):
+        calls.append((url, cv, letter, answers, kw))
         return result
 
     job_id, _ = store.upsert(make_job())
@@ -33,7 +34,7 @@ def setup(settings, store, tmp_path, result=OK):
         answers={"Why us?": ""},
     )
     store.set_status(job_id, Status.NEEDS_YOU, "1 open question")
-    return TestClient(create_app(settings, store, fake_apply)), job_id, calls
+    return TestClient(create_app(tmp_path, AuthConfig(), fake_apply)), job_id, calls
 
 
 def test_board_and_detail_render(settings, store, tmp_path):
@@ -54,7 +55,8 @@ def test_answering_promotes_then_send_applies(settings, store, tmp_path):
     assert job["status"] == Status.READY and job["cover_letter"] == "Dear"
     c.post(f"/jobs/{job_id}/send")
     assert store.get(job_id)["status"] == Status.APPLIED
-    url, cv, letter, answers = calls[0]
+    url, cv, letter, answers, kw = calls[0]
+    assert kw["screenshot"].name == "send_failure.png"
     assert (
         url.endswith("/apply")
         and answers == {"Why us?": "Mission"}
@@ -79,7 +81,31 @@ def test_manual_status_moves(settings, store, tmp_path):
 
 def test_missing_pdfs_404(settings, store):
     job_id, _ = store.upsert(make_job(source_id="z", title="AI Architect"))
-    c = TestClient(create_app(settings, store))
+    c = TestClient(create_app(settings.data_dir, AuthConfig()))
     assert c.get(f"/jobs/{job_id}/cv.pdf").status_code == 404
     assert c.get(f"/jobs/{job_id}/cover_letter.pdf").status_code == 404
     assert Path(settings.data_dir).exists()
+
+
+def test_screenshot_link_and_kpis(settings, store, tmp_path):
+    c, job_id, _ = setup(settings, store, tmp_path)
+    assert c.get(f"/jobs/{job_id}/screenshot.png").status_code == 404
+    (tmp_path / "app" / "send_failure.png").write_bytes(b"\x89PNG")
+    assert "See what the form showed" in c.get(f"/jobs/{job_id}").text
+    assert c.get(f"/jobs/{job_id}/screenshot.png").headers["content-type"] == "image/png"
+    board = c.get("/").text
+    assert "Needs you" in board and "In play" in board and "--p: 88" in board
+
+
+def test_send_without_cv_is_409(settings, store, tmp_path):
+    c, job_id, calls = setup(settings, store, tmp_path)
+    store.update(job_id, cv_path=str(tmp_path / "gone.pdf"))
+    store.set_status(job_id, Status.READY)
+    assert c.post(f"/jobs/{job_id}/send").status_code == 409 and not calls
+
+
+def test_local_mode_has_no_login(settings, tmp_path):
+    c = TestClient(create_app(tmp_path, AuthConfig()))
+    assert c.get("/healthz").json() == {"ok": True}
+    assert c.get("/login", follow_redirects=False).headers["location"] == "/"
+    assert "Sign out" not in c.get("/").text

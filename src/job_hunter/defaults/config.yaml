@@ -95,6 +95,9 @@ tailor_model: claude-sonnet-5-5
 #   route: {en: groq, fr: mistral}
 #   prefer: byok        # or "claude": use Claude when available, your keys otherwise
 #   retry_429: true     # retry once on a rate limit before falling back to heuristics
+# Your name and contact details never go to the LLM. Set this to true to also replace
+# your employers' names with [EMPLOYER_n] tokens in prompts (real names stay in the PDFs).
+anonymise_employers: false
 jobspy_sites: [linkedin, indeed, glassdoor]
 profile:
   name: ""

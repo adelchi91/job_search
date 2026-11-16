@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from job_hunter.keystore import ChainKeyStore, EnvKeyStore, FileKeyStore
 from job_hunter.providers import GUIDE
 from job_hunter.web.app import create_app
+from job_hunter.web.auth import AuthConfig
 
 README = Path(__file__).parent.parent / "README.md"
 
@@ -23,7 +24,9 @@ def _client(settings, store, tmp_path, status=200, env=None):
 
     keystore = ChainKeyStore(EnvKeyStore(env or {}), FileKeyStore(tmp_path / "keys.yaml"))
     http = httpx.Client(transport=httpx.MockTransport(handler))
-    app = create_app(settings, store, keystore=keystore, http_client=http)
+    app = create_app(
+        settings.data_dir, AuthConfig(), keystore_factory=lambda _dir: keystore, http_client=http
+    )
     return TestClient(app), keystore
 
 

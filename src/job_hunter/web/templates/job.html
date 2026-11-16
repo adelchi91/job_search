@@ -2,28 +2,28 @@
 {% block title %}{{ job.company }} — {{ job.title }}{% endblock %}
 {% block body %}
 <div class="panel">
-  <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+  <div class="row">
     <h1 style="margin:0; font-size:20px">{{ job.title }} — {{ job.company }}</h1>
-    <span class="score">{{ job.score if job.score is not none else '–' }}</span>
+    <span class="badge">Fit {{ job.score if job.score is not none else '–' }}</span>
     <span class="muted">{{ job.status }} · {{ job.location or '—' }} · {{ job.source }}{% if job.also_seen_on %} (also on {{ job.also_seen_on|join(', ') }}){% endif %}</span>
   </div>
   <p class="muted">{{ job.score_reason }}</p>
-  {% if job.route_reason %}<p class="reason">{{ job.route_reason }}</p>{% endif %}
+  {% if job.route_reason or has_shot %}<p class="reason">{{ job.route_reason }}{% if has_shot %} · <a href="/jobs/{{ job.id }}/screenshot.png" target="_blank">See what the form showed</a>{% endif %}</p>{% endif %}
   <p>
     <a href="{{ job.url }}" target="_blank">Posting</a>
     {% if job.apply_url and job.apply_url != job.url %} · <a href="{{ job.apply_url }}" target="_blank">Application form</a>{% endif %}
-    {% if job.cv_path %} · <a href="/jobs/{{ job.id }}/cv.pdf" target="_blank">Tailored CV (PDF)</a>
+    {% if has_cv %} · <a href="/jobs/{{ job.id }}/cv.pdf" target="_blank">Tailored CV (PDF)</a>
     · <a href="/jobs/{{ job.id }}/cover_letter.pdf" target="_blank">Cover letter (PDF)</a>{% endif %}
   </p>
-  <div style="display:flex; gap:8px; flex-wrap:wrap">
+  <div class="row">
     {% if job.status == Status.READY %}
     <form method="post" action="/jobs/{{ job.id }}/send"
           onsubmit="return confirm('Fill and submit the application to {{ job.company }} now?')">
       <button class="primary">Approve &amp; send</button>
     </form>
     {% endif %}
-    <form method="post" action="/jobs/{{ job.id }}/status" style="display:flex; gap:6px">
-      <select name="status">{% for s in moves %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select>
+    <form method="post" action="/jobs/{{ job.id }}/status" class="row">
+      <select name="status" style="width:auto">{% for s in moves %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select>
       <button>Move</button>
     </form>
   </div>
@@ -41,7 +41,7 @@
     <form method="post" action="/jobs/{{ job.id }}/answers">
       <h3>Form answers</h3>
       {% for q, a in job.answers.items() %}
-      <label>{{ q }}{% if not a %} <strong style="color:#b45309">(needs your answer)</strong>{% endif %}
+      <label>{{ q }}{% if not a %} <strong style="color:var(--needs)">(needs your answer)</strong>{% endif %}
         <input type="text" name="a:{{ q }}" value="{{ a }}"></label><br><br>
       {% else %}<p class="muted">No extra questions detected.</p>{% endfor %}
       <h3>Cover letter</h3>

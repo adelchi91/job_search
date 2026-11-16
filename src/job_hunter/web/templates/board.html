@@ -1,27 +1,35 @@
 {% extends "base.html" %}
-{% macro score(j) -%}
-{% if j.score is not none %}<span class="score {{ 'hi' if j.score >= 75 else ('lo' if j.score < 60 else '') }}">{{ j.score }}</span>{% endif %}
+{% macro ring(j) -%}
+{% if j.score is not none %}<span class="ring {{ 'hi' if j.score >= 75 else ('lo' if j.score < 60 else '') }}" style="--p: {{ j.score }}" title="Fit {{ j.score }}/100"><b>{{ j.score }}</b></span>
+{%- else %}<span class="ring" title="Not scored"><b>–</b></span>{% endif %}
 {%- endmacro %}
-{% block header %}<span class="counts">{% for k, v in counts.items() %}{{ k }}: {{ v }}&nbsp;&nbsp;{% endfor %}</span>{% endblock %}
 {% block body %}
+<section class="kpis">
+  {% for label, n, cls in kpis %}
+  <div class="kpi {{ cls }}"><div class="n">{{ n }}</div><div class="l">{{ label }}</div></div>
+  {% endfor %}
+</section>
 <div class="lanes">
   {% for status, title, hint, jobs in lanes %}
   <section class="lane {{ status }}">
-    <h2>{{ title }} ({{ jobs|length }})</h2>
-    <div class="hint">{{ hint }}</div>
+    <h2><span>{{ title }}</span><span>{{ jobs|length }}</span></h2>
+    <div class="hint">{{ hint or '&nbsp;'|safe }}</div>
     {% for j in jobs %}
     <a class="card" href="/jobs/{{ j.id }}">
-      {{ score(j) }}<div class="co">{{ j.company }}</div>
-      <div>{{ j.title }}</div>
-      <div class="meta">{{ j.location or '—' }} · {{ j.source }}{% if j.also_seen_on %} +{{ j.also_seen_on|length }}{% endif %}</div>
+      {{ ring(j) }}
+      <div>
+        <div class="co">{{ j.company }}</div>
+        <div>{{ j.title }}</div>
+        <div class="meta">{{ j.location or '—' }} · {{ j.source }}{% if j.also_seen_on %} +{{ j.also_seen_on|length }}{% endif %}</div>
+      </div>
     </a>
     {% endfor %}
   </section>
   {% endfor %}
 </div>
 {% for status, title, jobs in side %}
-<details class="side">
-  <summary><strong>{{ title }}</strong> ({{ jobs|length }})</summary>
+<details class="side panel">
+  <summary><strong>{{ title }}</strong> <span class="badge">{{ jobs|length }}</span></summary>
   <table>
     <tr><th>Fit</th><th>Company</th><th>Role</th><th>Location</th><th>Note</th></tr>
     {% for j in jobs %}

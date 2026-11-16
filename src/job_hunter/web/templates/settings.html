@@ -5,9 +5,9 @@
 <p class="muted">Free AI scoring and tailoring with your own Groq and/or Mistral key.
 Without a key the tracker uses Claude if it is available, otherwise keyword heuristics.</p>
 
-{% if note %}<p class="ok">{{ note }}</p>{% endif %}
+{% if note %}<p class="flash ok">{{ note }}</p>{% endif %}
 {% if result %}
-<p class="{{ 'ok' if result.ok else 'err' }}" id="test-result">
+<p class="flash {{ 'ok' if result.ok else 'error' }}" id="test-result">
   <strong>{{ result.label }}:</strong> {{ result.message }}
 </p>
 {% endif %}
@@ -34,7 +34,7 @@ Without a key the tracker uses Claude if it is available, otherwise keyword heur
       <button type="submit" formaction="/settings/ai/{{ p.name }}/test">Test connection</button>
     </div>
   </form>
-  {% if p.source == "saved in data/keys.yaml" %}
+  {% if p.source == "saved in your keys.yaml" %}
   <form method="post" action="/settings/ai/{{ p.name }}/remove">
     <button type="submit">Remove saved key</button>
   </form>

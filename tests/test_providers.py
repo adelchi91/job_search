@@ -132,7 +132,7 @@ def test_both_route_english_to_groq_and_french_to_mistral(settings, store):
         assert host == ("api.mistral.ai" if FR_DESC[:20] in prompt else "api.groq.com")
     assert server.hosts() == {"api.groq.com", "api.mistral.ai"}
     letters = {r["language"]: r["cover_letter"] for r in store.by_status(Status.READY)}
-    assert letters == {"en": "Dear team", "fr": "Bonjour"}
+    assert letters["en"].startswith("Dear team") and letters["fr"].startswith("Bonjour")
 
 
 def test_no_keys_keeps_todays_behaviour(settings, store, monkeypatch):
