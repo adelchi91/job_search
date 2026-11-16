@@ -13,6 +13,7 @@ from pathlib import Path
 import httpx
 import yaml
 
+from job_hunter import usage
 from job_hunter.collectors import build_collectors
 from job_hunter.collectors.base import Collector, run_collectors
 from job_hunter.config import Settings
@@ -58,29 +59,41 @@ def ingest(store: Store, jobs: list[Job], settings: Settings) -> tuple[int, list
 LLMArg = LLMRouter | LLM | None
 
 
+def mark_quota(store: Store, job_id: int, scope: usage.JobScope) -> None:
+    """Flag a job whose LLM calls fell back to templates because every quota was used up."""
+    if scope.quota_hits:
+        store.update(job_id, ai_fallback="quota")
+        store.log(job_id, "ai_fallback", usage.QUOTA_NOTE)
+
+
+def _cv_text(master: dict) -> str:
+    return yaml.safe_dump(redact_master(master), allow_unicode=True, sort_keys=False)
+
+
+def _score(row: dict, master: dict, settings: Settings, llm: LLMArg) -> dict:
+    job = job_from_row(row)
+    backend, model = LLMRouter.wrap(llm, settings).for_scoring(detect_language(job))
+    return score_job(job, _cv_text(master), settings.roles, backend, model, settings.role_keywords)
+
+
 def score_new(store: Store, master: dict, settings: Settings, llm: LLMArg) -> None:
     router = LLMRouter.wrap(llm, settings)
-    cv_text = yaml.safe_dump(redact_master(master), allow_unicode=True, sort_keys=False)
     for row in store.by_status(Status.NEW):
-        job = job_from_row(row)
-        backend, model = router.for_scoring(detect_language(job))
-        out = score_job(job, cv_text, settings.roles, backend, model, settings.role_keywords)
+        with usage.job_scope(row["id"]) as scope:
+            out = _score(row, master, settings, router)
         status = Status.MATCH if out["score"] >= settings.fit_threshold else Status.LOW_FIT
         store.update(
             row["id"], score=out["score"], score_reason=out["reason"], language=out["language"]
         )
         store.set_status(row["id"], status, f"fit {out['score']}")
+        mark_quota(store, row["id"], scope)
 
 
 def prepare(store: Store, row: dict, master: dict, settings: Settings, llm: LLMArg, client) -> None:
     """Tailor CV + letter for one matched job, render PDFs and route it."""
     job = job_from_row(row)
-    lang = row["language"] or "en"
-    backend, model = LLMRouter.wrap(llm, settings).for_tailoring(lang)
-    anonymise = settings.anonymise_employers
-    tailored = tailor(master, job, lang, backend, model, anonymise_employers=anonymise)
-    letter = cover_letter(master, tailored, job, backend, model, anonymise_employers=anonymise)
-    cv_pdf = render_application(row, master, tailored, letter, settings)
+    with usage.job_scope(row["id"]) as scope:
+        cv_pdf, letter, tailored = _tailor_and_render(row, master, settings, llm)
     r = route(job, settings.profile, client)
     answers = {**r.answers, **{q: "" for q in r.open_questions}}
     store.update(
@@ -92,6 +105,17 @@ def prepare(store: Store, row: dict, master: dict, settings: Settings, llm: LLMA
         route_reason=r.reason,
     )
     store.set_status(row["id"], r.status, r.reason)
+    mark_quota(store, row["id"], scope)
+
+
+def _tailor_and_render(row: dict, master: dict, settings: Settings, llm: LLMArg):
+    job = job_from_row(row)
+    lang = row["language"] or "en"
+    backend, model = LLMRouter.wrap(llm, settings).for_tailoring(lang)
+    anonymise = settings.anonymise_employers
+    tailored = tailor(master, job, lang, backend, model, anonymise_employers=anonymise)
+    letter = cover_letter(master, tailored, job, backend, model, anonymise_employers=anonymise)
+    return render_application(row, master, tailored, letter, settings), letter, tailored
 
 
 def _app_dir(settings: Settings, job_id: int) -> Path:
@@ -154,11 +178,17 @@ def _slug(text: str) -> str:
 
 
 def prepare_matches(
-    store: Store, master: dict, settings: Settings, llm: LLMArg, client
+    store: Store,
+    master: dict,
+    settings: Settings,
+    llm: LLMArg,
+    client,
+    limit: int | None = None,
 ) -> list[int]:
     done: list[int] = []
+    limit = settings.max_tailored_per_run if limit is None else limit
     for row in store.by_status(Status.MATCH):
-        if len(done) >= settings.max_tailored_per_run:
+        if len(done) >= limit:
             break
         if store.open_count(row["company"]) >= settings.max_open_per_company:
             store.update(
@@ -176,20 +206,90 @@ def prepare_matches(
     return done
 
 
+RETRY_STATUSES = (Status.READY, Status.NEEDS_YOU, Status.MATCH, Status.LOW_FIT)
+
+
+def rerun_ai(
+    store: Store, job_id: int, master: dict, settings: Settings, llm: LLMArg, client
+) -> bool:
+    """Redo with AI the parts of a job that fell back to templates because of a quota.
+
+    Re-scores, then re-tailors and re-renders; answers already typed are kept. Returns True
+    when every call went through the LLM (the quota flag is then cleared).
+    """
+    row = store.get(job_id)
+    if row is None or not _has_llm(llm, settings):
+        return False
+    with usage.job_scope(job_id) as scope:
+        _rescore(store, row, master, settings, llm)
+        row = store.get(job_id)
+        if row["status"] == Status.MATCH:
+            prepare(store, row, master, settings, llm, client)
+        elif row["status"] in (Status.READY, Status.NEEDS_YOU):
+            cv_pdf, letter, tailored = _tailor_and_render(row, master, settings, llm)
+            store.update(
+                job_id, cv_path=str(cv_pdf), cv_diff=cv_diff(master, tailored), cover_letter=letter
+            )
+    if scope.quota_hits:
+        store.log(job_id, "ai_rerun", "quota still reached: kept the template version")
+        return False
+    store.update(job_id, ai_fallback="")
+    store.log(job_id, "ai_rerun", "re-run with AI")
+    return True
+
+
+def _has_llm(llm: LLMArg, settings: Settings) -> bool:
+    router = LLMRouter.wrap(llm, settings)
+    return bool(router.backends) or router.fallback is not None
+
+
+def _rescore(store: Store, row: dict, master: dict, settings: Settings, llm: LLMArg) -> None:
+    if not str(row["score_reason"]).startswith("heuristic"):
+        return
+    out = _score(row, master, settings, llm)
+    store.update(row["id"], score=out["score"], score_reason=out["reason"])
+    if row["status"] in (Status.MATCH, Status.LOW_FIT):
+        new = Status.MATCH if out["score"] >= settings.fit_threshold else Status.LOW_FIT
+        if new != row["status"]:
+            store.set_status(row["id"], new, f"fit {out['score']} (re-scored with AI)")
+
+
+def retry_quota_jobs(
+    store: Store, master: dict, settings: Settings, llm: LLMArg, client, limit: int
+) -> list[int]:
+    """Jobs flagged by an earlier quota fallback, re-run first in today's batch."""
+    if not _has_llm(llm, settings):
+        return []
+    done = []
+    for row in store.quota_flagged(*RETRY_STATUSES)[:limit]:
+        try:
+            if rerun_ai(store, row["id"], master, settings, llm, client):
+                done.append(row["id"])
+        except Exception:  # noqa: BLE001 - one bad job never stops the run
+            log.exception("re-running job %s with AI failed", row["id"])
+    return done
+
+
 def run(
     settings: Settings,
     store: Store,
     client: httpx.Client,
     llm: LLMArg,
     collectors: list[Collector] | None = None,
+    user_id: str | None = None,
 ) -> RunResult:
+    if usage.current_sink() is None:
+        with usage.recording(store, user_id):
+            return run(settings, store, client, llm, collectors, user_id)
     master = load_master(settings.master_cv_path)
     llm = LLMRouter.wrap(llm, settings)
     jobs, report = run_collectors(collectors or build_collectors(settings), client)
     kept, new_ids = ingest(store, jobs, settings)
     log.info("collected %d, kept %d, new %d", len(jobs), kept, len(new_ids))
+    budget = settings.max_tailored_per_run
+    retried = retry_quota_jobs(store, master, settings, llm, client, budget)
     score_new(store, master, settings, llm)
-    prepared = prepare_matches(store, master, settings, llm, client)
+    prepared = prepare_matches(store, master, settings, llm, client, budget - len(retried))
     digest = build_digest(store, report, new_ids)
     path = write_digest(digest, settings.data_dir)
     return RunResult(report, len(jobs), kept, new_ids, prepared, path, digest)

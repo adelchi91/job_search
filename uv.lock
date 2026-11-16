@@ -917,7 +917,7 @@ provides-extras = ["boards", "llm", "apply"]
 dev = [
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-cov", specifier = ">=5" },
-    { name = "pytest-xdist", specifier = ">=3" },
+    { name = "pytest-xdist", specifier = ">=3.6" },
     { name = "ruff", specifier = ">=0.6" },
 ]
 

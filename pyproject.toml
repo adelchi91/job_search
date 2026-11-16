@@ -30,7 +30,7 @@ job-hunter = "job_hunter.cli:main"
 dev = [
     "pytest>=8",
     "pytest-cov>=5",
-    "pytest-xdist>=3",
+    "pytest-xdist>=3.6",
     "ruff>=0.6",
 ]
 

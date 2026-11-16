@@ -14,9 +14,11 @@ from dataclasses import dataclass
 import httpx
 
 from job_hunter import llm as llm_mod
+from job_hunter import usage
 from job_hunter.config import Settings
 from job_hunter.keystore import KeyStore
 from job_hunter.llm import LLM, OpenAICompatLLM
+from job_hunter.ratelimit import Limiter, QuotaGuard, RateLimited, Slot
 
 
 @dataclass(frozen=True)
@@ -141,6 +143,7 @@ def make_backend(
     llm = OpenAICompatLLM(
         cfg.get("base_url", preset.base_url),
         key,
+        provider=name,
         client=client,
         json_mode=cfg.get("json_mode", True),
         **kw,
@@ -153,6 +156,15 @@ def make_backend(
     )
 
 
+def guarded(backend: Backend, llm_limits: dict | None, retry_429: bool = True) -> Backend:
+    """Throttle a backend to its free-tier limits (`llm_limits`). A 429 is retried once (when
+    `retry_429`), then the job falls back to heuristics / templates, flagged "quota reached"."""
+    caps = usage.limits_for(llm_limits or {}, backend.name)
+    slot = Slot(backend.name, backend.llm, "", Limiter.from_limits(caps))
+    guard = QuotaGuard([slot], retry_429=retry_429)
+    return Backend(backend.name, guard, backend.score_model, backend.tailor_model)
+
+
 def build_router(
     settings: Settings, keystore: KeyStore, client: httpx.Client | None = None
 ) -> LLMRouter:
@@ -161,12 +173,18 @@ def build_router(
     cfg = settings.llm or {}
     retry = bool(cfg.get("retry_429", True))
     backends = {
-        name: make_backend(name, key, cfg.get(name), client, retry_429=retry)
+        name: guarded(
+            make_backend(name, key, cfg.get(name), client, retry_429=False),
+            settings.llm_limits,
+            retry,
+        )
         for name in PRESETS
         if (key := keystore.get(name))
     }
     if not backends or cfg.get("prefer") == "claude":
         claude = llm_mod.get_llm()
+        if isinstance(claude, QuotaGuard):  # env Groq/Mistral keys: want Claude itself here
+            claude = llm_mod.claude_llm()
         if claude is not None or not backends:
             return LLMRouter.wrap(claude, settings)
     return LLMRouter(backends, cfg.get("route"))
@@ -199,6 +217,8 @@ def test_connection(
         b.llm.complete('Reply with {"ok": true}', model=b.score_model)
     except httpx.HTTPStatusError as exc:
         return False, f"{exc.response.status_code}: {_error_text(exc.response)}"
+    except RateLimited as exc:
+        return False, f"429: {exc}"
     except (httpx.HTTPError, KeyError, ValueError) as exc:
         return False, f"Connection failed: {exc}"
     return True, f"OK · {b.score_model} · {int((time.monotonic() - start) * 1000)} ms"

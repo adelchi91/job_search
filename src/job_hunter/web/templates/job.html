@@ -8,6 +8,12 @@
     <span class="muted">{{ job.status }} · {{ job.location or '—' }} · {{ job.source }}{% if job.also_seen_on %} (also on {{ job.also_seen_on|join(', ') }}){% endif %}</span>
   </div>
   <p class="muted">{{ job.score_reason }}</p>
+  {% if job.ai_fallback == 'quota' %}
+  <div class="row quota-note">
+    <span class="badge quota">Prepared without AI (quota reached)</span>
+    <form method="post" action="/jobs/{{ job.id }}/rerun-ai"><button>Re-run with AI</button></form>
+  </div>
+  {% endif %}
   {% if job.route_reason or has_shot %}<p class="reason">{{ job.route_reason }}{% if has_shot %} · <a href="/jobs/{{ job.id }}/screenshot.png" target="_blank">See what the form showed</a>{% endif %}</p>{% endif %}
   <p>
     <a href="{{ job.url }}" target="_blank">Posting</a>

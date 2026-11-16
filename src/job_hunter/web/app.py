@@ -23,6 +23,7 @@ from job_hunter.routing import AUTO_ATS
 from job_hunter.userfiles import resolve_in
 from job_hunter.web import ai_settings
 from job_hunter.web.auth import SESSION_DAYS, AuthConfig, install_auth, make_oauth
+from job_hunter.web.usage import widget as usage_widget
 from job_hunter.web.workspace import Stores, Workspace, render, workspace
 
 LANES = [
@@ -102,6 +103,7 @@ def _pages(app: FastAPI) -> None:
         side = [(s, title, ws.store.by_status(s)) for s, title in SIDE]
         counts = ws.store.counts()
         ctx = {"lanes": lanes, "side": side, "counts": counts, "kpis": _kpis(counts)}
+        ctx["usage"] = usage_widget(ws)
         return render(request, "board.html", ctx)
 
     @app.get("/jobs/{job_id}")
@@ -203,6 +205,7 @@ def create_app(
     """root is the data dir in local mode, or the volume holding allowlist.yaml + users/."""
     from job_hunter.web.admin import install_admin
     from job_hunter.web.files import install_files
+    from job_hunter.web.usage import install_usage
 
     auth = auth or AuthConfig()
     app = FastAPI(title="job-hunter", lifespan=_lifespan)
@@ -228,5 +231,6 @@ def create_app(
     _actions(app)
     install_files(app)
     install_admin(app)
+    install_usage(app)
     ai_settings.register(app)
     return app

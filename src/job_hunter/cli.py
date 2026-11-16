@@ -1,4 +1,4 @@
-"""Command line: `job-hunter init | run | run-all | serve | export | schedule`."""
+"""Command line: `job-hunter init | run | run-all | serve | export | rerun-ai | schedule`."""
 
 from __future__ import annotations
 
@@ -105,6 +105,29 @@ def cmd_rerender(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_rerun_ai(args: argparse.Namespace) -> int:
+    """Re-run with AI the jobs prepared from templates because a quota was reached."""
+    from job_hunter.pipeline import RETRY_STATUSES, rerun_ai
+    from job_hunter.usage import recording
+
+    settings = load_settings(Path(args.data))
+    llm = get_llm(settings.llm_limits)
+    if llm is None:
+        print("No LLM configured: set GROQ_API_KEY, MISTRAL_API_KEY or ANTHROPIC_API_KEY.")
+        return 1
+    store = Store(settings.db_path)
+    flagged = [r["id"] for r in store.quota_flagged(*RETRY_STATUSES)]
+    ids = flagged if args.all else [int(i) for i in args.ids]
+    if not ids:
+        print(f"{len(flagged)} job(s) flagged; pass their ids or --all.")
+        return 0
+    master = load_master(settings.master_cv_path)
+    with recording(store), make_client() as client:
+        done = [i for i in ids if rerun_ai(store, i, master, settings, llm, client)]
+    print(f"Re-ran {len(done)} of {len(ids)} job(s) with AI.")
+    return 0 if len(done) == len(ids) else 1
+
+
 def _app_from_env(root: Path):
     """The web app as configured by environment variables (see README, Deploy)."""
     from job_hunter.daily import DailyScheduler, run_everyone
@@ -196,6 +219,10 @@ def parser() -> argparse.ArgumentParser:
     rr = sub.add_parser("rerender", help="rebuild prepared CV/letter PDFs with the current look")
     rr.add_argument("--no-llm", action="store_true", help="heuristic tailoring for old items")
     rr.set_defaults(func=cmd_rerender)
+    ra = sub.add_parser("rerun-ai", help="redo with AI the jobs prepared during a quota")
+    ra.add_argument("ids", nargs="*", help="job ids (see the dashboard)")
+    ra.add_argument("--all", action="store_true", help="every job flagged by a quota")
+    ra.set_defaults(func=cmd_rerun_ai)
     sub.add_parser("init", help="create editable config files").set_defaults(func=cmd_init)
     sub.add_parser("schedule", help="install the weekday 08:00 launchd job").set_defaults(
         func=cmd_schedule

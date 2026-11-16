@@ -99,6 +99,14 @@ tailor_model: claude-sonnet-5-5
 # your employers' names with [EMPLOYER_n] tokens in prompts (real names stay in the PDFs).
 anonymise_employers: false
 jobspy_sites: [linkedin, indeed, glassdoor]
+# Free-tier LLM limits, per provider then per model ("default" applies to any model).
+# rpm/rps = requests per minute/second, rpd = per day, tpm/tpd/tpmonth = tokens per
+# minute/day/month. Rate-limit headers override the request numbers when the API sends them.
+llm_limits:
+  groq:  # console.groq.com/docs/rate-limits, checked 2026-11-16 (free plan)
+    default: {rpm: 30, rpd: 1000, tpm: 8000, tpd: 200000}
+  mistral:  # PLACEHOLDER: copy the real numbers from admin.mistral.ai -> Limits
+    default: {rps: 1, tpm: 500000, tpmonth: 1000000000}
 profile:
   name: ""
   email: ""

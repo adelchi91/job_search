@@ -175,3 +175,21 @@ pre.diff {
   .lanes, .kpis { grid-template-columns: 1fr; }
   .top { flex-wrap: wrap; }
 }
+
+/* AI usage widget (JH-66) */
+.usage { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 0 0 16px; }
+.usage-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.usage-card.amber { border-color: var(--needs); }
+.usage-card.red { border-color: var(--danger); }
+.usage-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; margin-bottom: 8px; }
+.meter { margin: 6px 0; }
+.meter-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.meter .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 3px; }
+.meter .bar i { display: block; height: 100%; background: var(--ready); }
+.meter.amber .bar i { background: var(--needs); }
+.meter.red .bar i { background: var(--danger); }
+.small { font-size: 12px; }
+.badge.quota { color: var(--needs); border-color: var(--needs); }
+.card .badge.quota { margin-top: 4px; display: inline-block; font-size: 11px; }
+.quota-note { margin: 8px 0; }
+.history .spark { display: inline-block; height: 6px; width: calc(var(--w) * 0.6px); background: var(--ready); border-radius: 3px; margin-right: 6px; vertical-align: middle; }
