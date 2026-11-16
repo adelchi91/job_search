@@ -2,6 +2,7 @@
 {% block title %}Admin · job hunter{% endblock %}
 {% block body %}
 <div class="grid2">
+  {% if not local %}
   <section class="panel">
     <h3>Who can sign in</h3>
     <table>
@@ -25,6 +26,7 @@
     </form>
     <p class="muted">They sign in with that Google account. Each person gets their own folder, board and settings.</p>
   </section>
+  {% endif %}
 
   <section class="panel">
     <h3>Daily run</h3>
@@ -45,5 +47,28 @@
     </table>
     {% endif %}
   </section>
+
+  <section class="panel" id="claude" data-local="{{ '1' if local else '0' }}">
+    <h3>Claude account</h3>
+    <p class="claude-status"><span class="dot"></span><strong data-k="label">Checking…</strong></p>
+    <p class="muted" data-k="meta"></p>
+    <div class="row">
+      <button class="primary" data-act="login">Sign in</button>
+      <button data-act="cancel" hidden>Cancel</button>
+      <button class="link" data-act="logout" hidden>Sign out of Claude</button>
+    </div>
+    <div class="claude-step" data-k="manual" hidden>
+      <p>1. Open <a target="_blank" rel="noopener noreferrer" data-k="manual-link">the Claude sign-in page</a> and approve.</p>
+      <p>2. Paste the code it shows you:</p>
+      <form class="row" data-act="code" autocomplete="off">
+        <input type="text" name="code" placeholder="code from claude.ai" required style="flex:1" spellcheck="false">
+        <button class="primary">Submit code</button>
+      </form>
+    </div>
+    <p class="muted" data-k="hint" hidden>Finish signing in in the tab that just opened.</p>
+    <details class="side"><summary>Login log</summary><pre class="diff" data-k="log">(no sign-in yet)</pre></details>
+    <p class="muted">Only you (the admin) use this Claude subscription: it powers your own CV import and tailoring. Other people's runs never call Claude.</p>
+  </section>
 </div>
+<script src="/static/claude.js" defer></script>
 {% endblock %}

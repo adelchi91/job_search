@@ -83,15 +83,21 @@ def run_user(
     return UserRun(user.email, "done", note + (", emailed" if sent else ""))
 
 
-def run_everyone(directory: Directory, llm: LLM | None, mailer=None, app_url="", **kw) -> list:
-    """One pass over every allowed user. Returns [] if another run holds the lock."""
+LLMFor = Callable[[User], "LLM | None"]
+
+
+def run_everyone(directory: Directory, llm_for: LLMFor, mailer=None, app_url="", **kw) -> list:
+    """One pass over every allowed user, each with their own LLM (llm_for(user)).
+
+    Returns [] if another run holds the lock."""
     if not RUN_LOCK.acquire(blocking=False):
         return []
     try:
         results = []
         for user in directory.users():
             try:
-                results.append(run_user(user, directory.user_dir(user), llm, mailer, app_url, **kw))
+                folder = directory.user_dir(user)
+                results.append(run_user(user, folder, llm_for(user), mailer, app_url, **kw))
             except Exception as exc:  # noqa: BLE001 - one user's failure never stops the rest
                 log.exception("daily run for %s failed", user.email)
                 results.append(UserRun(user.email, "failed", str(exc)[:300]))

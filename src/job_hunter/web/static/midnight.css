@@ -151,6 +151,15 @@ pre.diff {
   background: rgba(248, 113, 113, .1); border: 1px solid rgba(248, 113, 113, .45);
 }
 
+/* Claude account panel */
+.claude-status .dot {
+  display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px;
+  background: var(--muted);
+}
+.claude-status.ok .dot { background: var(--ready); }
+.claude-status.warn .dot { background: var(--needs); }
+.claude-step { margin-top: 12px; }
+
 /* sign-in */
 .center { min-height: 80vh; display: grid; place-items: center; }
 .signin {

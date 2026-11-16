@@ -126,7 +126,7 @@ def _cv_routes(app: FastAPI) -> None:
         content = await upload.read()
         try:
             save_doc(ws.data_dir, "cv", upload.filename or "cv.pdf", content)
-            llm = request.app.state.llm_factory()
+            llm = request.app.state.llm_factory(ws.user)
             cvimport.make_draft(ws.data_dir, content, llm, ws.settings.tailor_model)
         except FileError as exc:
             flash(request, str(exc), "error")

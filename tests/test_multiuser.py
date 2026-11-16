@@ -50,7 +50,7 @@ def cfg() -> AuthConfig:
 def server(tmp_path: Path):
     oauth = FakeOAuth()
     Directory(tmp_path, ADMIN).add(WIFE, "Partner")
-    app = create_app(tmp_path, cfg(), oauth=oauth, llm_factory=lambda: None)
+    app = create_app(tmp_path, cfg(), oauth=oauth, llm_factory=lambda u: None)
     # https_only cookies need an https base url in the test client
     client = TestClient(app, base_url="https://testserver")
     return client, oauth, app
@@ -177,7 +177,7 @@ def test_cv_import_draft_apply_and_discard(server, monkeypatch):
 
     master = {"name": "Partner Person", "experience": [{"company": "X", "bullets": []}]}
     monkeypatch.setattr(cvimport, "pdf_text", lambda content: "Partner Person, worked at X")
-    app.state.llm_factory = lambda: FakeLLM({"Convert this CV": master})
+    app.state.llm_factory = lambda u: FakeLLM({"Convert this CV": master})
     up = {"upload": ("cv.pdf", b"%PDF", "application/pdf")}
     r = c.post("/files/cv-import", files=up)
     assert "Draft master CV ready" in r.text and "Partner Person" in r.text

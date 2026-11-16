@@ -33,9 +33,7 @@ def start_run(app: FastAPI) -> bool:
     state = app.state
 
     def job():
-        results = run_everyone(
-            state.directory, state.llm_factory(), state.mailer, state.auth.app_url
-        )
+        results = run_everyone(state.directory, state.llm_factory, state.mailer, state.auth.app_url)
         if results:
             state.last_manual = results
 

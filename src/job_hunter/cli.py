@@ -16,7 +16,7 @@ from job_hunter.collectors.base import make_client
 from job_hunter.collectors.boards import JobspyCollector
 from job_hunter.config import DEFAULTS_DIR, Settings, load_settings
 from job_hunter.db import Store
-from job_hunter.llm import get_llm
+from job_hunter.llm import get_llm, llm_for
 from job_hunter.tailor.cv import load_master
 
 DEFAULT_FILES = ("config.yaml", "companies.yaml", "master_cv.yaml")
@@ -110,7 +110,7 @@ def _app_from_env(root: Path):
     scheduler = None
     if os.environ.get("JOB_HUNTER_SCHEDULER") == "1":
         directory = auth.directory(root)
-        scheduler = DailyScheduler(lambda: run_everyone(directory, get_llm(), mailer, auth.app_url))
+        scheduler = DailyScheduler(lambda: run_everyone(directory, llm_for, mailer, auth.app_url))
     return create_app(root, auth, mailer=mailer, scheduler=scheduler)
 
 
@@ -133,7 +133,7 @@ def cmd_run_all(args: argparse.Namespace) -> int:
     auth = AuthConfig.from_env()
     smtp = SmtpConfig.from_env()
     results = run_everyone(
-        auth.directory(Path(args.data)), get_llm(), Mailer(smtp) if smtp else None, auth.app_url
+        auth.directory(Path(args.data)), llm_for, Mailer(smtp) if smtp else None, auth.app_url
     )
     for r in results:
         print(f"{r.email}: {r.status} {r.detail}")

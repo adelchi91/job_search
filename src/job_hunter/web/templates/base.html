@@ -14,7 +14,7 @@
   <nav class="nav">
     <a href="/" class="{{ 'on' if path == '/' or path.startswith('/jobs') }}">Board</a>
     <a href="/files" class="{{ 'on' if path.startswith('/files') }}">My files</a>
-    {% if me.admin and not local %}<a href="/admin" class="{{ 'on' if path.startswith('/admin') }}">Admin</a>{% endif %}
+    {% if me.admin %}<a href="/admin" class="{{ 'on' if path.startswith('/admin') }}">Admin</a>{% endif %}
   </nav>
   <div class="me">
     <span class="chip"><span class="avatar">{{ me.label[:1]|upper }}</span>{{ me.label }}</span>
