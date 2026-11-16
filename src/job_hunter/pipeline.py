@@ -25,6 +25,7 @@ from job_hunter.routing import route
 from job_hunter.scoring import score_job
 from job_hunter.tailor.cover import cover_letter
 from job_hunter.tailor.cv import build_document, cv_diff, load_master, tailor
+from job_hunter.tailor.privacy import redact_master
 from job_hunter.tailor.render import render_cv, render_letter
 
 log = logging.getLogger("job_hunter.pipeline")
@@ -54,7 +55,7 @@ def ingest(store: Store, jobs: list[Job], settings: Settings) -> tuple[int, list
 
 
 def score_new(store: Store, master: dict, settings: Settings, llm: LLM | None) -> None:
-    cv_text = yaml.safe_dump(master, allow_unicode=True, sort_keys=False)
+    cv_text = yaml.safe_dump(redact_master(master), allow_unicode=True, sort_keys=False)
     for row in store.by_status(Status.NEW):
         out = score_job(
             job_from_row(row),
@@ -77,8 +78,11 @@ def prepare(
     """Tailor CV + letter for one matched job, render PDFs and route it."""
     job = job_from_row(row)
     lang = row["language"] or "en"
-    tailored = tailor(master, job, lang, llm, settings.tailor_model)
-    letter = cover_letter(master, tailored, job, llm, settings.tailor_model)
+    anonymise = settings.anonymise_employers
+    tailored = tailor(master, job, lang, llm, settings.tailor_model, anonymise_employers=anonymise)
+    letter = cover_letter(
+        master, tailored, job, llm, settings.tailor_model, anonymise_employers=anonymise
+    )
     cv_pdf = render_application(row, master, tailored, letter, settings)
     r = route(job, settings.profile, client)
     answers = {**r.answers, **{q: "" for q in r.open_questions}}
@@ -129,7 +133,14 @@ def rerender(store: Store, settings: Settings, llm: LLM | None) -> list[int]:
                 tailored = json.loads(saved.read_text(encoding="utf-8"))
             else:
                 lang = row["language"] or "en"
-                tailored = tailor(master, job_from_row(row), lang, llm, settings.tailor_model)
+                tailored = tailor(
+                    master,
+                    job_from_row(row),
+                    lang,
+                    llm,
+                    settings.tailor_model,
+                    anonymise_employers=settings.anonymise_employers,
+                )
             cv_pdf = render_application(row, master, tailored, row["cover_letter"], settings)
         except Exception:  # noqa: BLE001 - one bad application never stops the rest
             log.exception("re-rendering job %s failed", row["id"])

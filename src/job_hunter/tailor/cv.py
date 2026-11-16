@@ -17,6 +17,7 @@ import yaml
 from job_hunter.filters import fold
 from job_hunter.llm import LLM
 from job_hunter.models import Job
+from job_hunter.tailor.privacy import Pseudonymiser, redact_master
 
 log = logging.getLogger("job_hunter.tailor")
 
@@ -145,18 +146,33 @@ def heuristic_tailoring(master: dict, job: Job, lang: str) -> dict:
     return out
 
 
-def tailor(master: dict, job: Job, lang: str, llm: LLM | None, model: str) -> dict:
+def tailor(
+    master: dict,
+    job: Job,
+    lang: str,
+    llm: LLM | None,
+    model: str,
+    *,
+    anonymise_employers: bool = False,
+) -> dict:
+    """Tailor with the model when there is one. The prompt never carries the candidate's
+    name or contact details; with `anonymise_employers` it carries no employer names either."""
     if llm is not None:
+        safe = redact_master(master)
+        pseudo = Pseudonymiser(master) if anonymise_employers else None
+        if pseudo:
+            safe = pseudo.forward(safe)
         prompt = TAILOR_PROMPT.format(
             lang=lang,
-            master=yaml.safe_dump(master, allow_unicode=True, sort_keys=False)[:15000],
+            master=yaml.safe_dump(safe, allow_unicode=True, sort_keys=False)[:15000],
             title=job.title,
             company=job.company,
             description=job.description[:8000],
             max_bullets=MAX_BULLETS,
         )
         try:
-            return validate(master, llm.json(prompt, model=model, system=TAILOR_SYSTEM), lang)
+            proposal = llm.json(prompt, model=model, system=TAILOR_SYSTEM)
+            return validate(master, pseudo.back(proposal) if pseudo else proposal, lang)
         except Exception as exc:  # noqa: BLE001 - deterministic fallback
             log.warning("LLM tailoring failed for %s: %s", job.title, exc)
     return heuristic_tailoring(master, job, lang)
