@@ -60,7 +60,7 @@
     <div class="claude-step" data-k="manual" hidden>
       <p>1. Open <a target="_blank" rel="noopener noreferrer" data-k="manual-link">the Claude sign-in page</a> and approve.</p>
       <p>2. Paste the code it shows you:</p>
-      <form class="row" data-act="code" autocomplete="off">
+      <form class="row" data-act="code" autocomplete="off">{{ csrf_field() }}
         <input type="text" name="code" placeholder="code from claude.ai" required style="flex:1" spellcheck="false">
         <button class="primary">Submit code</button>
       </form>

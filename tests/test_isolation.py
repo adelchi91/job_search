@@ -231,3 +231,28 @@ def test_local_mode_keys_page_works(tmp_path):
     arm_csrf(c)
     assert "Groq key saved" in c.post("/keys/groq", data={"key": GROQ_KEY}).text
     assert (tmp_path / ".encryption_key").exists()
+
+
+def test_default_router_uses_dashboard_claude_only_for_admin(tmp_path, monkeypatch):
+    from job_hunter import claude_auth
+    from job_hunter.llm import ClaudeCliLLM
+
+    for variable in ("JOB_HUNTER_NO_LLM", "GROQ_API_KEY", "MISTRAL_API_KEY", "ANTHROPIC_API_KEY"):
+        monkeypatch.delenv(variable, raising=False)
+    monkeypatch.setattr(claude_auth, "binary", lambda: "/fake/claude")
+    monkeypatch.setattr(
+        claude_auth, "status", lambda: claude_auth.ClaudeStatus(installed=True, logged_in=True)
+    )
+    fernet = make_fernet(Fernet.generate_key().decode())
+    factory = make_llm_factory(fernet)
+    admin = factory(User(ADMIN, "", True), tmp_path)
+    assert isinstance(admin, MeteredLLM) and isinstance(admin.inner, ClaudeCliLLM)
+    assert factory(User(WIFE, "", False), tmp_path) is None
+    keys = EncryptedKeyStore(tmp_path, fernet)
+    keys.set("mistral", "own-mistral-key")
+    other = factory(User(WIFE, "", False), tmp_path)
+    assert isinstance(other.inner, OpenAICompatLLM) and other.provider == "mistral"
+    monkeypatch.setattr(
+        claude_auth, "status", lambda: claude_auth.ClaudeStatus(installed=True, logged_in=False)
+    )
+    assert factory(User(ADMIN, "", True), tmp_path).provider == "mistral"

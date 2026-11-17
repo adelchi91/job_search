@@ -11,7 +11,7 @@
   {% if job.ai_fallback == 'quota' %}
   <div class="row quota-note">
     <span class="badge quota">Prepared without AI (quota reached)</span>
-    <form method="post" action="/jobs/{{ job.id }}/rerun-ai"><button>Re-run with AI</button></form>
+    <form method="post" action="/jobs/{{ job.id }}/rerun-ai">{{ csrf_field() }}<button>Re-run with AI</button></form>
   </div>
   {% endif %}
   {% if job.route_reason or has_shot %}<p class="reason">{{ job.route_reason }}{% if has_shot %} · <a href="/jobs/{{ job.id }}/screenshot.png" target="_blank">See what the form showed</a>{% endif %}</p>{% endif %}
