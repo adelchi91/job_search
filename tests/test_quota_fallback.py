@@ -7,7 +7,7 @@ import re
 
 import httpx
 import pytest
-from conftest import FakeLLM, make_job
+from conftest import FakeLLM, arm_csrf, make_job
 from fastapi.testclient import TestClient
 
 from job_hunter import cli, fixtures, usage
@@ -229,6 +229,7 @@ def test_rerun_ai_keeps_flag_while_quota_is_out(settings, store, tmp_path):
 def test_web_rerun_button(settings, store, tmp_path):
     job_id = flagged_ready_job(settings, store, tmp_path)
     c = TestClient(create_app(tmp_path, AuthConfig(), llm_factory=lambda: None))
+    arm_csrf(c, f"/jobs/{job_id}")
     page = c.get(f"/jobs/{job_id}").text
     assert "Prepared without AI (quota reached)" in page and "Re-run with AI" in page
     assert "no AI · quota" in c.get("/").text

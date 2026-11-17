@@ -6,6 +6,7 @@ from pathlib import Path
 
 import httpx
 import pytest
+from conftest import arm_csrf
 from fastapi.testclient import TestClient
 
 from job_hunter.keystore import ChainKeyStore, EnvKeyStore, FileKeyStore
@@ -27,7 +28,9 @@ def _client(settings, store, tmp_path, status=200, env=None):
     app = create_app(
         settings.data_dir, AuthConfig(), keystore_factory=lambda _dir: keystore, http_client=http
     )
-    return TestClient(app), keystore
+    client = TestClient(app)
+    arm_csrf(client, "/settings")
+    return client, keystore
 
 
 def test_page_renders_guide_and_masked_key(settings, store, tmp_path):

@@ -12,7 +12,10 @@
   let opened = false;
 
   async function call(path, body) {
-    const res = await fetch(path, body ? { method: "POST", body } : {});
+    const headers = body
+      ? { "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content }
+      : {};
+    const res = await fetch(path, body ? { method: "POST", body, headers } : {});
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || res.statusText);
     return data;
