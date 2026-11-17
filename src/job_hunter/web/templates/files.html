@@ -8,7 +8,7 @@
       {% for name, label in tabs %}<a href="/files?edit={{ name }}" class="{{ 'on' if name == edit }}">{{ label }}</a>{% endfor %}
     </nav>
     {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
-    <form method="post" action="/files/yaml/{{ edit }}">
+    <form method="post" action="/files/yaml/{{ edit }}">{{ csrf_field() }}
       <textarea class="code" name="text" spellcheck="false">{{ text }}</textarea>
       <div class="row" style="margin-top:10px">
         <button class="primary">Save {{ edit }}</button>
@@ -17,7 +17,7 @@
     </form>
     {% if versions %}
     <form method="post" action="/files/yaml/{{ edit }}/undo" style="margin-top:8px"
-          onsubmit="return confirm('Restore the previous version of {{ edit }}?')">
+          onsubmit="return confirm('Restore the previous version of {{ edit }}?')">{{ csrf_field() }}
       <button>Undo last save</button>
     </form>
     {% endif %}
@@ -28,16 +28,16 @@
       <h3>Master CV from a PDF</h3>
       {% if draft %}
       <p class="muted">A draft is waiting. Check it, edit it if needed, then apply it.</p>
-      <form method="post" action="/files/cv-import/apply">
+      <form method="post" action="/files/cv-import/apply">{{ csrf_field() }}
         <textarea class="code" name="text" spellcheck="false" style="min-height:300px">{{ draft }}</textarea>
         <div class="row" style="margin-top:8px">
           <button class="primary">Apply as master CV</button>
         </div>
       </form>
-      <form method="post" action="/files/cv-import/discard" style="margin-top:8px"><button class="danger">Discard draft</button></form>
+      <form method="post" action="/files/cv-import/discard" style="margin-top:8px">{{ csrf_field() }}<button class="danger">Discard draft</button></form>
       {% else %}
       <p class="muted">Upload your CV as a PDF: it is kept in your <em>cv</em> folder and turned into a draft master CV for you to review.</p>
-      <form method="post" action="/files/cv-import" enctype="multipart/form-data" class="row">
+      <form method="post" action="/files/cv-import" enctype="multipart/form-data" class="row">{{ csrf_field() }}
         <input type="file" name="upload" accept="application/pdf" required>
         <button class="primary">Draft from PDF</button>
       </form>
@@ -46,7 +46,7 @@
 
     <section class="panel">
       <h3>Documents</h3>
-      <form method="post" action="/files/docs" enctype="multipart/form-data" class="row" style="margin-bottom:12px">
+      <form method="post" action="/files/docs" enctype="multipart/form-data" class="row" style="margin-bottom:12px">{{ csrf_field() }}
         <select name="folder" style="width:auto">{% for f in folders %}<option value="{{ f }}">{{ f }}</option>{% endfor %}</select>
         <input type="file" name="upload" required>
         <button>Upload</button>
@@ -60,7 +60,7 @@
           <td class="muted">{{ (d.size / 1024)|round(0)|int }} KB</td>
           <td style="text-align:right">
             <form method="post" action="/files/docs/{{ folder }}/{{ d.name|urlencode }}/delete"
-                  onsubmit="return confirm('Delete {{ d.name }}?')"><button class="link">Delete</button></form>
+                  onsubmit="return confirm('Delete {{ d.name }}?')">{{ csrf_field() }}<button class="link">Delete</button></form>
           </td>
         </tr>
         {% else %}<tr><td class="muted">Empty</td></tr>{% endfor %}
@@ -68,12 +68,46 @@
       {% endfor %}
     </section>
 
+    <section class="panel" id="keys">
+      <h3>AI keys</h3>
+      {% if uses_claude %}
+      <p class="muted">Your runs use the server's Claude first; a key here is the fallback.</p>
+      {% else %}
+      <p class="muted">The AI steps (scoring, CV tailoring, CV import) run on your own free Groq or Mistral key. Without one, job hunter falls back to simpler rules.</p>
+      {% endif %}
+      <table>
+        {% for k in keys %}
+        <tr>
+          <td>{{ k.label }}</td>
+          <td>{% if k.state == 'set' %}<code>{{ k.mask }}</code>{% elif k.state == 'unreadable' %}<span class="badge">unreadable: save it again</span>{% else %}<span class="muted">not set</span>{% endif %}</td>
+          <td style="text-align:right">{% if k.state != 'missing' %}
+            <form method="post" action="/keys/{{ k.provider }}/delete" onsubmit="return confirm('Remove your {{ k.label }} key?')">{{ csrf_field() }}<button class="link">Remove</button></form>
+          {% endif %}</td>
+        </tr>
+        <tr><td colspan="3">
+          <form method="post" action="/keys/{{ k.provider }}" class="row">{{ csrf_field() }}
+            <input type="password" name="key" placeholder="paste a {{ k.label }} API key" autocomplete="off" required style="flex:1">
+            <button>Save</button>
+          </form>
+        </td></tr>
+        {% endfor %}
+      </table>
+      <p class="muted">Keys are encrypted on the server and never shown again.</p>
+      {% if usage %}
+      <h4>Your AI usage</h4>
+      <table>
+        <tr><th>Provider</th><th>Calls</th><th>Failed</th><th>Tokens</th><th>Last</th></tr>
+        {% for u in usage %}<tr><td>{{ u.provider }}</td><td>{{ u.calls }}</td><td>{{ u.failed }}</td><td>{{ u.tokens }}</td><td class="muted">{{ u.last }}</td></tr>{% endfor %}
+      </table>
+      {% endif %}
+    </section>
+
     <section class="panel">
       <h3>Move your data</h3>
       <p class="muted">Download everything (settings, jobs, CVs, documents) as one zip, or bring a folder from another machine.</p>
       <p><a class="btn" href="/files/export.zip">Download my data (.zip)</a></p>
       <form method="post" action="/files/import" enctype="multipart/form-data" class="row"
-            onsubmit="return confirm('Files in the zip replace your current ones. Continue?')">
+            onsubmit="return confirm('Files in the zip replace your current ones. Continue?')">{{ csrf_field() }}
         <input type="file" name="upload" accept=".zip,application/zip" required>
         <button>Import zip</button>
       </form>

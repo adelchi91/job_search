@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Job hunter{% endblock %}</title>
 <link rel="stylesheet" href="/static/midnight.css">
+{% if me %}<meta name="csrf-token" content="{{ csrf_token() }}">{% endif %}
 </head>
 <body>
 <header class="top">
@@ -14,12 +15,14 @@
   <nav class="nav">
     <a href="/" class="{{ 'on' if path == '/' or path.startswith('/jobs') }}">Board</a>
     <a href="/files" class="{{ 'on' if path.startswith('/files') }}">My files</a>
+    <a href="/usage" class="{{ 'on' if path.startswith('/usage') }}">AI usage</a>
+    <a href="/settings" class="{{ 'on' if path.startswith('/settings') }}">Settings</a>
     {% if me.admin %}<a href="/admin" class="{{ 'on' if path.startswith('/admin') }}">Admin</a>{% endif %}
   </nav>
   <div class="me">
     <span class="chip"><span class="avatar">{{ me.label[:1]|upper }}</span>{{ me.label }}</span>
     {% if not local %}
-    <form method="post" action="/logout"><button class="link">Sign out</button></form>
+    <form method="post" action="/logout">{{ csrf_field() }}<button class="link">Sign out</button></form>
     {% endif %}
   </div>
   {% endif %}

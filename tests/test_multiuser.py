@@ -7,7 +7,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
-from conftest import FakeLLM, make_job
+from conftest import FakeLLM, arm_csrf, make_job
 from fastapi.responses import RedirectResponse
 from fastapi.testclient import TestClient
 
@@ -50,7 +50,7 @@ def cfg() -> AuthConfig:
 def server(tmp_path: Path):
     oauth = FakeOAuth()
     Directory(tmp_path, ADMIN).add(WIFE, "Partner")
-    app = create_app(tmp_path, cfg(), oauth=oauth, llm_factory=lambda u: None)
+    app = create_app(tmp_path, cfg(), oauth=oauth, llm_factory=lambda *a: None)
     # https_only cookies need an https base url in the test client
     client = TestClient(app, base_url="https://testserver")
     return client, oauth, app
@@ -58,7 +58,11 @@ def server(tmp_path: Path):
 
 def sign_in(client, oauth, email):
     oauth.google.email = email
-    return client.get("/auth/callback", follow_redirects=False)
+    client.headers.pop("X-CSRF-Token", None)
+    r = client.get("/auth/callback", follow_redirects=False)
+    if r.status_code == 303 and r.headers["location"] == "/":
+        arm_csrf(client)
+    return r
 
 
 def test_pages_need_sign_in(server):
@@ -177,7 +181,7 @@ def test_cv_import_draft_apply_and_discard(server, monkeypatch):
 
     master = {"name": "Partner Person", "experience": [{"company": "X", "bullets": []}]}
     monkeypatch.setattr(cvimport, "pdf_text", lambda content: "Partner Person, worked at X")
-    app.state.llm_factory = lambda u: FakeLLM({"Convert this CV": master})
+    app.state.llm_factory = lambda *a: FakeLLM({"Convert this CV": master})
     up = {"upload": ("cv.pdf", b"%PDF", "application/pdf")}
     r = c.post("/files/cv-import", files=up)
     assert "Draft master CV ready" in r.text and "Partner Person" in r.text

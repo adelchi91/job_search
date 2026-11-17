@@ -22,6 +22,7 @@ from job_hunter.userfiles import (
     undo_yaml,
 )
 from job_hunter.users import DOC_FOLDERS
+from job_hunter.web.keys import keys_context
 from job_hunter.web.workspace import Workspace, flash, render, workspace
 
 WS = Depends(workspace)
@@ -54,6 +55,7 @@ def _page(request: Request, ws: Workspace, edit: str, text=None, error="", statu
         "docs": list_docs(ws.data_dir),
         "folders": DOC_FOLDERS,
         "draft": cvimport.read_draft(ws.data_dir),
+        **keys_context(request, ws),
     }
     return render(request, "files.html", ctx, status_code=status)
 
@@ -126,7 +128,7 @@ def _cv_routes(app: FastAPI) -> None:
         content = await upload.read()
         try:
             save_doc(ws.data_dir, "cv", upload.filename or "cv.pdf", content)
-            llm = request.app.state.llm_factory(ws.user)
+            llm = request.app.state.llm_factory(ws.user, ws.data_dir)
             cvimport.make_draft(ws.data_dir, content, llm, ws.settings.tailor_model)
         except FileError as exc:
             flash(request, str(exc), "error")

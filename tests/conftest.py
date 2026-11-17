@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -26,6 +27,13 @@ class FakeLLM:
             if key in prompt:
                 return reply
         raise KeyError("no canned reply")
+
+
+@pytest.fixture(autouse=True)
+def _no_free_tier_keys(monkeypatch):
+    """Tests opt in to Groq / Mistral explicitly; a developer's own keys never leak in."""
+    for var in ("GROQ_API_KEY", "MISTRAL_API_KEY", "GROQ_MODEL", "MISTRAL_MODEL"):
+        monkeypatch.delenv(var, raising=False)
 
 
 @pytest.fixture
@@ -58,3 +66,10 @@ def make_job(**kw) -> Job:
     )
     base.update(kw)
     return Job(**base)
+
+
+def arm_csrf(client, page: str = "/") -> str:
+    """Read the session's CSRF token from a page and send it on every later request."""
+    token = re.search(r'name="csrf-token" content="([^"]+)"', client.get(page).text).group(1)
+    client.headers["X-CSRF-Token"] = token
+    return token

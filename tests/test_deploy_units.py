@@ -311,7 +311,7 @@ def test_run_everyone_skips_samples_isolates_failures(tmp_path, monkeypatch):
     monkeypatch.setattr(pipeline, "run", fake_run)
     FakeSMTP.sent = []
     mailer = Mailer(SmtpConfig("h"), smtp_factory=FakeSMTP)
-    results = {r.email: r for r in daily.run_everyone(d, lambda u: None, mailer, "https://jh")}
+    results = {r.email: r for r in daily.run_everyone(d, lambda *a: None, mailer, "https://jh")}
     assert results["admin@x.io"].status == "skipped"  # still the sample CV
     assert results["boom@x.io"].status == "failed" and "board down" in results["boom@x.io"].detail
     assert results["ok@x.io"].detail == "1 new, 0 prepared, emailed"
@@ -320,7 +320,7 @@ def test_run_everyone_skips_samples_isolates_failures(tmp_path, monkeypatch):
 
 def test_run_everyone_respects_lock(tmp_path):
     with daily.RUN_LOCK:
-        assert daily.run_everyone(Directory(tmp_path), lambda u: None) == []
+        assert daily.run_everyone(Directory(tmp_path), lambda *a: None) == []
 
 
 def test_has_real_cv(tmp_path):

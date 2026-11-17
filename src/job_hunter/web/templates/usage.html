@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}AI usage{% endblock %}
+{% block body %}
+<h1 style="font-size:20px">AI usage</h1>
+{% if not usage %}<p class="muted">No AI provider is configured and no call was recorded today.</p>{% endif %}
+{% include "_usage.html" %}
+<div class="panel">
+  <h2 style="font-size:16px; margin-top:0">Last 7 days (Paris time)</h2>
+  <table class="history">
+    <tr><th>Day</th>{% for name in providers %}<th>{{ name|capitalize }} requests</th><th>tokens</th><th>429</th>{% endfor %}</tr>
+    {% for d in days %}
+    <tr><td>{{ d.day.strftime('%a %d %b') }}</td>
+      {% for name in providers %}{% set t = d.providers.get(name) %}
+      <td><span class="spark" style="--w: {{ ((t.requests if t else 0) * 100 / peak)|round|int }}%"></span>{{ t.requests if t else 0 }}</td>
+      <td>{{ "{:,}".format(t.tokens) if t else 0 }}</td>
+      <td>{{ t.rate_limited if t else 0 }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% if states %}
+<details class="panel">
+  <summary><strong>Latest rate-limit headers</strong></summary>
+  <table>
+    <tr><th>Provider</th><th>Model</th><th>Window</th><th>Limit</th><th>Remaining</th><th>Resets (UTC)</th><th>Seen</th></tr>
+    {% for s in states %}{% for key, w in (s.json.windows or {}).items() %}
+    <tr><td>{{ s.provider }}</td><td>{{ s.model }}</td><td>{{ key }}</td><td>{{ w.limit }}</td>
+      <td>{{ w.remaining }}</td><td>{{ w.reset_at }}</td><td class="muted">{{ s.updated_at }}</td></tr>
+    {% endfor %}{% endfor %}
+  </table>
+</details>
+{% endif %}
+{% endblock %}

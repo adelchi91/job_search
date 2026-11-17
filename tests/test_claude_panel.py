@@ -100,7 +100,7 @@ def test_admin_cancel_and_missing_cli(server, monkeypatch):  # noqa: F811
 
 
 def test_local_mode_admin_gets_panel_and_nav(tmp_path):
-    c = TestClient(create_app(tmp_path, AuthConfig(), llm_factory=lambda u: None))
+    c = TestClient(create_app(tmp_path, AuthConfig(), llm_factory=lambda *a: None))
     assert 'href="/admin"' in c.get("/").text
     page = c.get("/admin").text
     assert 'data-local="1"' in page and "Who can sign in" not in page

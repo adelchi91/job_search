@@ -9,6 +9,7 @@
   <div class="kpi {{ cls }}"><div class="n">{{ n }}</div><div class="l">{{ label }}</div></div>
   {% endfor %}
 </section>
+{% include "_usage.html" %}
 <div class="lanes">
   {% for status, title, hint, jobs in lanes %}
   <section class="lane {{ status }}">
@@ -21,6 +22,7 @@
         <div class="co">{{ j.company }}</div>
         <div>{{ j.title }}</div>
         <div class="meta">{{ j.location or '—' }} · {{ j.source }}{% if j.also_seen_on %} +{{ j.also_seen_on|length }}{% endif %}</div>
+        {% if j.ai_fallback == 'quota' %}<div class="badge quota" title="Prepared without AI (quota reached)">no AI · quota</div>{% endif %}
       </div>
     </a>
     {% endfor %}

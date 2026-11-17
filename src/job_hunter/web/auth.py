@@ -11,9 +11,11 @@ import os
 import secrets
 from dataclasses import dataclass
 
+from cryptography.fernet import MultiFernet
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 
+from job_hunter.secrets_store import local_fernet, make_fernet
 from job_hunter.users import Directory, User, normalise
 
 GOOGLE_METADATA = "https://accounts.google.com/.well-known/openid-configuration"
@@ -28,6 +30,8 @@ class AuthConfig:
     google_client_secret: str = ""
     app_url: str = ""
     dev_email: str = "me@localhost"
+    encryption_key: str = ""  # JOB_HUNTER_ENCRYPTION_KEY: Fernet key(s) for users' API keys
+    allowed_emails: tuple[str, ...] = ()  # ALLOWED_EMAILS: always allowed, set in the env
 
     @property
     def local(self) -> bool:
@@ -42,18 +46,34 @@ class AuthConfig:
             google_client_id=env.get("GOOGLE_CLIENT_ID", ""),
             google_client_secret=env.get("GOOGLE_CLIENT_SECRET", ""),
             app_url=env.get("APP_URL", "").rstrip("/"),
+            encryption_key=env.get("JOB_HUNTER_ENCRYPTION_KEY", ""),
+            allowed_emails=_email_list(env.get("ALLOWED_EMAILS", "")),
         )
         if cfg.local and env.get("JOB_HUNTER_REQUIRE_AUTH") == "1":
             raise RuntimeError("this server needs Google sign-in: set GOOGLE_CLIENT_ID")
         if not cfg.local and not (cfg.admin_email and cfg.session_secret):
             raise RuntimeError("Google sign-in needs ADMIN_EMAIL and SESSION_SECRET as well")
+        if not cfg.local and not cfg.encryption_key:
+            raise RuntimeError("set JOB_HUNTER_ENCRYPTION_KEY to store users' API keys (README)")
+        if cfg.encryption_key:
+            make_fernet(cfg.encryption_key)  # fail at start-up, not on the first save
         cfg.session_secret = cfg.session_secret or secrets.token_urlsafe(32)
         return cfg
 
     def directory(self, root) -> Directory:
         if self.local:
             return Directory(root, self.admin_email or self.dev_email, single_dir=root)
-        return Directory(root, self.admin_email)
+        return Directory(root, self.admin_email, env_emails=self.allowed_emails)
+
+    def fernet(self, root) -> MultiFernet:
+        """The server key from the env; in local mode a key file next to the data."""
+        if self.encryption_key:
+            return make_fernet(self.encryption_key)
+        return local_fernet(root)
+
+
+def _email_list(raw: str) -> tuple[str, ...]:
+    return tuple(e for e in (normalise(x) for x in raw.replace(";", ",").split(",")) if e)
 
 
 class LoginRequired(Exception):

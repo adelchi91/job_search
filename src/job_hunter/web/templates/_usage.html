@@ -1,0 +1,19 @@
+{% if usage %}
+<section class="usage">
+  {% for p in usage %}
+  <div class="usage-card {{ p.tone }}">
+    <div class="usage-head">
+      <strong>{{ p.provider|capitalize }}</strong>
+      <span class="muted">{{ p.requests }} requests · {{ "{:,}".format(p.tokens) }} tokens today{% if p.rate_limited %} · {{ p.rate_limited }}× 429{% endif %}</span>
+    </div>
+    {% for m in p.meters %}
+    <div class="meter {{ m.tone }}" title="{{ m.label }}">
+      <div class="meter-label"><span>{{ m.label }}</span><span>{{ "{:,}".format(m.used) }}{% if m.cap %} / {{ "{:,}".format(m.cap) }} ({{ m.pct }}%){% endif %}</span></div>
+      {% if m.cap %}<div class="bar"><i style="width: {{ m.pct }}%"></i></div>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="muted small">{% if p.resets_at %}Resets {{ p.resets_at.strftime('%a %H:%M') }} (Paris){% endif %} · <a href="/usage">7-day history</a></div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}

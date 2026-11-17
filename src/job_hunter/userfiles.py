@@ -24,7 +24,9 @@ HISTORY_KEEP = 10
 MAX_DOC_BYTES = 15 * 1024 * 1024
 MAX_ZIP_BYTES = 200 * 1024 * 1024
 SAFE_NAME = re.compile(r"[^A-Za-z0-9._ ()-]+")
-SKIP_EXPORT = ("dry-run",)
+# API keys and the local encryption key never travel in a zip, either way
+PRIVATE = ("secrets.json", ".encryption_key")
+SKIP_EXPORT = ("dry-run", *PRIVATE)
 
 
 class FileError(ValueError):
@@ -193,6 +195,7 @@ def import_zip(data_dir: Path, content: bytes) -> int:
         infos = _members(zf)
         prefix = _common_prefix(infos)
         root = data_dir.resolve()
+        infos = [i for i in infos if i.filename[len(prefix) :] not in PRIVATE]
         for info in infos:
             rel = info.filename[len(prefix) :]
             target = (root / rel).resolve()
