@@ -5,21 +5,38 @@ Whoever runs a batch for a user opens `recording(store, user_id)`; every call ma
 that block lands in that user's store. Outside any block, records are dropped.
 
 "Today" is the Europe/Paris calendar day.
+
+Per-user LLM usage summary: `record` / `summary` also keep one row per model call in a
+`usage` table of the user's own jobs.sqlite, so each user's usage is isolated exactly like
+their jobs. The admin page reads every user's file to show the totals side by side.
 """
 
 from __future__ import annotations
 
+import sqlite3
 from collections.abc import Iterable, Iterator
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, time, timedelta
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 PARIS = ZoneInfo("Europe/Paris")
 AMBER_AT = 80
 QUOTA_NOTE = "prepared without AI (quota reached)"
 FAR_FUTURE = "9999-12-31"
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS usage (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    at TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    model TEXT DEFAULT '',
+    ok INTEGER NOT NULL,
+    tokens INTEGER DEFAULT 0
+);
+"""
 
 
 @dataclass
@@ -255,3 +272,35 @@ def _reset_time(caps: dict, state: dict, now: datetime) -> datetime | None:
         first = (utc.date().replace(day=1) + timedelta(days=32)).replace(day=1)
         return datetime.combine(first, time.min, UTC).astimezone(PARIS)
     return None
+
+
+# --- per-user usage table (record / summary) -------------------------------------
+
+
+def _connect(db_path: Path) -> sqlite3.Connection:
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(db_path), timeout=10)
+    conn.executescript(SCHEMA)  # additive: existing jobs and events are untouched
+    return conn
+
+
+def record(db_path: Path, provider: str, model: str, ok: bool, tokens: int = 0) -> None:
+    at = datetime.now(UTC).isoformat(timespec="seconds")
+    with closing(_connect(db_path)) as conn, conn:
+        conn.execute(
+            "INSERT INTO usage (at, provider, model, ok, tokens) VALUES (?, ?, ?, ?, ?)",
+            (at, provider, model, int(ok), int(tokens or 0)),
+        )
+
+
+def summary(db_path: Path) -> list[dict]:
+    """One row per provider: calls, failures, tokens, last call. [] when nothing recorded."""
+    if not Path(db_path).exists():
+        return []
+    with closing(_connect(db_path)) as conn:
+        rows = conn.execute(
+            "SELECT provider, COUNT(*), SUM(1 - ok), COALESCE(SUM(tokens), 0), MAX(at) "
+            "FROM usage GROUP BY provider ORDER BY provider"
+        ).fetchall()
+    keys = ("provider", "calls", "failed", "tokens", "last")
+    return [dict(zip(keys, r, strict=True)) for r in rows]

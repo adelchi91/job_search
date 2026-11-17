@@ -10,15 +10,15 @@
       <tr>
         <td>{{ p.email }} {% if p.admin %}<span class="badge admin">admin</span>{% endif %}</td>
         <td>{{ p.name }}</td>
-        <td style="text-align:right">{% if not p.admin %}
-          <form method="post" action="/admin/people/remove" onsubmit="return confirm('Remove {{ p.email }}? Their files are kept.')">
+        <td style="text-align:right">{% if p.email in env_emails %}<span class="muted">set in ALLOWED_EMAILS</span>{% elif not p.admin %}
+          <form method="post" action="/admin/people/remove" onsubmit="return confirm('Remove {{ p.email }}? Their files are kept.')">{{ csrf_field() }}
             <input type="hidden" name="email" value="{{ p.email }}"><button class="link">Remove</button>
           </form>{% endif %}</td>
       </tr>
       {% endfor %}
     </table>
     <h4>Invite someone</h4>
-    <form method="post" action="/admin/people" class="row">
+    <form method="post" action="/admin/people" class="row">{{ csrf_field() }}
       <input type="email" name="email" placeholder="their Google email" required style="flex:2">
       <input type="text" name="name" placeholder="name (optional)" style="flex:1">
       <button class="primary">Add</button>
@@ -34,7 +34,7 @@
     <p class="muted">The scheduler is off (set JOB_HUNTER_SCHEDULER=1 to run every weekday at 08:00).</p>
     {% endif %}
     <p class="muted">Digest emails: {{ 'on' if mail else 'off (no SMTP_HOST set)' }}</p>
-    <form method="post" action="/admin/run">
+    <form method="post" action="/admin/run">{{ csrf_field() }}
       <button class="primary" {{ 'disabled' if running }}>{{ 'Running…' if running else 'Run now for everyone' }}</button>
     </form>
     {% if last %}
@@ -44,6 +44,17 @@
       {% for r in last %}<tr><td>{{ r.email }}</td><td>{{ r.status }}</td><td class="muted">{{ r.detail }}</td></tr>{% endfor %}
     </table>
     {% endif %}
+  </section>
+
+  <section class="panel">
+    <h3>AI usage</h3>
+    {% if usage %}
+    <table>
+      <tr><th>Who</th><th>Provider</th><th>Calls</th><th>Failed</th><th>Tokens</th><th>Last</th></tr>
+      {% for u in usage %}<tr><td>{{ u.email }}</td><td>{{ u.provider }}</td><td>{{ u.calls }}</td><td>{{ u.failed }}</td><td>{{ u.tokens }}</td><td class="muted">{{ u.last }}</td></tr>{% endfor %}
+    </table>
+    {% else %}<p class="muted">No AI calls recorded yet.</p>{% endif %}
+    <p class="muted">Only you run on the server's Claude; everyone else uses the Groq or Mistral key they saved under My files.</p>
   </section>
 </div>
 {% endblock %}

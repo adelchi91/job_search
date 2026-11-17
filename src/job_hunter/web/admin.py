@@ -7,6 +7,7 @@ import threading
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
+from job_hunter import usage
 from job_hunter.daily import RUN_LOCK, run_everyone
 from job_hunter.web.workspace import Workspace, flash, render, workspace
 
@@ -33,14 +34,21 @@ def start_run(app: FastAPI) -> bool:
     state = app.state
 
     def job():
-        results = run_everyone(
-            state.directory, state.llm_factory(), state.mailer, state.auth.app_url
-        )
+        results = run_everyone(state.directory, state.llm_factory, state.mailer, state.auth.app_url)
         if results:
             state.last_manual = results
 
     threading.Thread(target=job, name="manual-run", daemon=True).start()
     return True
+
+
+def usage_by_user(directory) -> list[dict]:
+    """Every user's own usage totals, read from their own folder (admin page only)."""
+    out = []
+    for user in directory.users():
+        for row in usage.summary(directory.user_dir(user) / "jobs.sqlite"):
+            out.append({"email": user.email, **row})
+    return out
 
 
 def install_admin(app: FastAPI) -> None:
@@ -52,6 +60,8 @@ def install_admin(app: FastAPI) -> None:
         sched = state.scheduler
         ctx = {
             "people": state.directory.users(),
+            "env_emails": state.directory.env_emails,
+            "usage": usage_by_user(state.directory),
             "next_at": sched.next_at if sched else None,
             "scheduled": sched is not None,
             "last": (sched.last if sched else []) or state.last_manual,

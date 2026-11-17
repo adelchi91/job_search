@@ -17,8 +17,10 @@ from job_hunter.config import Settings, load_settings
 from job_hunter.db import Store
 from job_hunter.users import User, ensure_user_dir
 from job_hunter.web.auth import current_user
+from job_hunter.web.csrf import csrf_field, csrf_token
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
+TEMPLATES.env.globals.update(csrf_field=csrf_field, csrf_token=csrf_token)
 
 
 @dataclass

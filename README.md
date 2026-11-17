@@ -111,6 +111,12 @@ The usual guardrails stay: the tailored CV is validated against your master CV (
 experiences, bullets and skills; a reworded bullet that adds a number is reverted), and any
 provider error, including a 429 rate limit, falls back to the heuristics for that job.
 
+On a shared server only the admin's runs use that Claude access. Everyone else saves their own
+free **Groq** or **Mistral** API key under **My files → AI keys** (the admin can add one too, as
+a fallback). Keys are encrypted at rest, shown only as a mask, and never leave the server in an
+export. Without a key a person's runs use the heuristics. Each person sees their own AI usage on
+**My files**. The admin sees everyone's on the **Admin** page.
+
 Locally (no `GOOGLE_CLIENT_ID` set) the app has a single user, no sign-in, and keeps using
 `data/` exactly as before.
 
@@ -154,11 +160,19 @@ list still gets "not invited".
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | from step 1 |
 | `SESSION_SECRET` | a long random string: `python -c "import secrets;print(secrets.token_urlsafe(48))"` |
 | `APP_URL` | `https://<your-app>.up.railway.app` |
-| `ANTHROPIC_API_KEY` | for scoring, tailoring and CV-from-PDF |
+| `JOB_HUNTER_ENCRYPTION_KEY` | **required**: encrypts the Groq/Mistral keys people save. Generate it with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` |
+| `ALLOWED_EMAILS` | optional comma list of Google addresses that may always sign in (in addition to the Admin page list; they cannot be removed there) |
+| `ANTHROPIC_API_KEY` | for the admin's scoring, tailoring and CV-from-PDF |
 | `JOB_HUNTER_SCHEDULER` | `1` (turns on the weekday 08:00 run) |
 | `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASSWORD` `SMTP_FROM` | digest email, e.g. `smtp.gmail.com`, `587`, a Gmail address and a Gmail **app password** (optional: without them there is no email) |
 
 Keep the service at **1 replica**: the scheduler and the SQLite files live in one process.
+
+The server refuses to start without `JOB_HUNTER_ENCRYPTION_KEY`. Keep a copy of it somewhere
+safe: if it is lost or changed, the saved keys can no longer be read (the page then says
+"unreadable: save it again"). To rotate, put the new key first and keep the old one after it,
+`JOB_HUNTER_ENCRYPTION_KEY=<new>,<old>`. Keys saved later use the new one. Locally, without the
+variable, a key file `data/.encryption_key` is created instead.
 
 ### 3. First sign-in, invite, migrate
 

@@ -48,9 +48,17 @@ class User:
 class Directory:
     """The allowlist, stored as root/allowlist.yaml: {users: [{email, name}]}."""
 
-    def __init__(self, root: Path, admin_email: str = "", single_dir: Path | None = None):
+    def __init__(
+        self,
+        root: Path,
+        admin_email: str = "",
+        single_dir: Path | None = None,
+        env_emails: tuple[str, ...] = (),
+    ):
         self.root = Path(root)
         self.admin_email = normalise(admin_email)
+        # ALLOWED_EMAILS: always allowed, managed in the env rather than on the Admin page
+        self.env_emails = tuple(normalise(e) for e in env_emails if normalise(e))
         # local mode: one user whose data dir is the root itself (today's data/ layout)
         self.single_dir = Path(single_dir) if single_dir else None
         self.path = self.root / "allowlist.yaml"
@@ -71,8 +79,9 @@ class Directory:
         if self.single_dir:
             return [User(self.admin_email, "", True)]
         rows = {normalise(r["email"]): r.get("name", "") for r in self._read()}
-        if self.admin_email:
-            rows.setdefault(self.admin_email, "")
+        for email in (self.admin_email, *self.env_emails):
+            if email:
+                rows.setdefault(email, "")
         return [User(e, n, e == self.admin_email) for e, n in sorted(rows.items())]
 
     def get(self, email: str) -> User | None:
@@ -94,6 +103,8 @@ class Directory:
         email = normalise(email)
         if email == self.admin_email:
             raise ValueError("the admin cannot be removed")
+        if email in self.env_emails:
+            raise ValueError(f"{email} is set in ALLOWED_EMAILS: remove it there")
         with self._lock:
             rows = self._read()
             kept = [r for r in rows if normalise(r["email"]) != email]
