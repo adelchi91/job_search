@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from job_hunter import usage
 from job_hunter.collectors.base import make_client
 from job_hunter.config import load_settings
 from job_hunter.db import Store
@@ -75,7 +76,7 @@ def run_user(
     settings = load_settings(data_dir)
     store = Store(settings.db_path)
     try:
-        with make_client(transport) as client:
+        with make_client(transport) as client, usage.recording(store, user.email):
             result = run(settings, store, client, llm, collectors)
     finally:
         store.close()

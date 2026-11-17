@@ -9,6 +9,7 @@ from collections.abc import Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import httpx
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -16,11 +17,15 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from job_hunter import applier
 from job_hunter.llm_router import LLMFactory, make_llm_factory
+from job_hunter.keystore import KeyStore, default_keystore
+from job_hunter.llm import get_llm
 from job_hunter.models import Status
 from job_hunter.routing import AUTO_ATS
 from job_hunter.userfiles import resolve_in
+from job_hunter.web import ai_settings
 from job_hunter.web.auth import SESSION_DAYS, AuthConfig, install_auth, make_oauth
 from job_hunter.web.csrf import verify_csrf
+from job_hunter.web.usage import widget as usage_widget
 from job_hunter.web.workspace import Stores, Workspace, render, workspace
 
 LANES = [
@@ -100,6 +105,7 @@ def _pages(app: FastAPI) -> None:
         side = [(s, title, ws.store.by_status(s)) for s, title in SIDE]
         counts = ws.store.counts()
         ctx = {"lanes": lanes, "side": side, "counts": counts, "kpis": _kpis(counts)}
+        ctx["usage"] = usage_widget(ws)
         return render(request, "board.html", ctx)
 
     @app.get("/jobs/{job_id}")
@@ -196,11 +202,14 @@ def create_app(
     llm_factory: LLMFactory | None = None,
     fernet=None,
     mailer=None,
+    keystore_factory: Callable[[Path], KeyStore] = default_keystore,
+    http_client: httpx.Client | None = None,
 ) -> FastAPI:
     """root is the data dir in local mode, or the volume holding allowlist.yaml + users/."""
     from job_hunter.web.admin import install_admin
     from job_hunter.web.files import install_files
     from job_hunter.web.keys import install_keys
+    from job_hunter.web.usage import install_usage
 
     auth = auth or AuthConfig()
     app = FastAPI(title="job-hunter", lifespan=_lifespan, dependencies=[Depends(verify_csrf)])
@@ -213,6 +222,7 @@ def create_app(
     state.llm_factory = llm_factory or make_llm_factory(state.fernet)
     state.oauth = oauth if oauth is not None or auth.local else make_oauth(auth)
     state.scheduler = scheduler
+    state.keystore_factory, state.http_client = keystore_factory, http_client
     app.add_middleware(
         SessionMiddleware,
         secret_key=auth.session_secret or "local-dev-only",
@@ -228,4 +238,6 @@ def create_app(
     install_files(app)
     install_keys(app)
     install_admin(app)
+    install_usage(app)
+    ai_settings.register(app)
     return app

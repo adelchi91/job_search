@@ -118,7 +118,9 @@ def test_scoring_prompt_carries_no_identity(master, monkeypatch):
 
     monkeypatch.setattr(pipeline, "score_job", fake_score)
     monkeypatch.setattr(pipeline, "job_from_row", lambda row: make_job())
-    settings = type("S", (), {"roles": [], "score_model": "m", "role_keywords": []})()
+    settings = type(
+        "S", (), {"roles": [], "score_model": "m", "tailor_model": "m", "role_keywords": []}
+    )()
     settings.fit_threshold = 60
     pipeline.score_new(Store(), master, settings, llm)
     assert seen and leaked(seen + llm.calls, SECRETS) == []

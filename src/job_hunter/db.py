@@ -46,7 +46,29 @@ CREATE TABLE IF NOT EXISTS events (
     kind TEXT NOT NULL,
     detail TEXT DEFAULT ''
 );
+CREATE TABLE IF NOT EXISTS llm_calls (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    at TEXT NOT NULL,
+    in_tokens INTEGER NOT NULL DEFAULT 0,
+    out_tokens INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL,
+    job_id INTEGER
+);
+CREATE INDEX IF NOT EXISTS llm_calls_at ON llm_calls (at);
+CREATE TABLE IF NOT EXISTS llm_rate_state (
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    json TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (provider, model)
+);
 """
+
+# Columns added after the first release: (name, DDL), applied to older databases on open.
+MIGRATIONS = (("ai_fallback", "ALTER TABLE jobs ADD COLUMN ai_fallback TEXT DEFAULT ''"),)
 
 JOB_FIELDS = (
     "source source_id company title url location remote description language "
@@ -65,6 +87,14 @@ class Store:
         self.conn = sqlite3.connect(str(path), check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        have = {r["name"] for r in self.conn.execute("PRAGMA table_info(jobs)")}
+        for column, ddl in MIGRATIONS:
+            if column not in have:
+                self.conn.execute(ddl)
+        self.conn.commit()
 
     def close(self) -> None:
         self.conn.close()
@@ -118,6 +148,25 @@ class Store:
         )
         self.conn.commit()
 
+    def record_call(self, call: dict) -> None:
+        """One LLM call: provider, model, at (UTC ISO), in/out tokens, status, user_id, job_id."""
+        cols = ("user_id", "provider", "model", "at", "in_tokens", "out_tokens", "status", "job_id")
+        row = {k: call.get(k) for k in cols}
+        row["at"] = row["at"] or now()
+        self.conn.execute(
+            f"INSERT INTO llm_calls ({', '.join(cols)}) VALUES ({', '.join('?' for _ in cols)})",
+            tuple(row.values()),
+        )
+        self.conn.commit()
+
+    def set_rate_state(self, provider: str, model: str, state: dict) -> None:
+        self.conn.execute(
+            "INSERT OR REPLACE INTO llm_rate_state (provider, model, json, updated_at) "
+            "VALUES (?, ?, ?, ?)",
+            (provider, model, json.dumps(state), now()),
+        )
+        self.conn.commit()
+
     # --- reads --------------------------------------------------------------
     def get(self, job_id: int) -> dict | None:
         row = self.conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
@@ -128,6 +177,16 @@ class Store:
         rows = self.conn.execute(
             f"SELECT * FROM jobs WHERE status IN ({marks}) "
             "ORDER BY COALESCE(score, -1) DESC, first_seen DESC",
+            tuple(str(s) for s in statuses),
+        ).fetchall()
+        return [_row(r) for r in rows]
+
+    def quota_flagged(self, *statuses: Status) -> list[dict]:
+        """Jobs prepared without AI because of a quota, oldest first."""
+        marks = ", ".join("?" for _ in statuses)
+        rows = self.conn.execute(
+            f"SELECT * FROM jobs WHERE ai_fallback = 'quota' AND status IN ({marks}) "
+            "ORDER BY updated_at",
             tuple(str(s) for s in statuses),
         ).fetchall()
         return [_row(r) for r in rows]
@@ -144,6 +203,17 @@ class Store:
             "SELECT * FROM events WHERE job_id = ? ORDER BY id", (job_id,)
         ).fetchall()
         return [dict(r) for r in rows]
+
+    def usage_between(self, start: str, end: str) -> list[dict]:
+        """LLM calls with start <= at < end (UTC ISO strings), oldest first."""
+        rows = self.conn.execute(
+            "SELECT * FROM llm_calls WHERE at >= ? AND at < ? ORDER BY at", (start, end)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    def rate_states(self) -> list[dict]:
+        rows = self.conn.execute("SELECT * FROM llm_rate_state ORDER BY provider, model")
+        return [{**dict(r), "json": json.loads(r["json"])} for r in rows.fetchall()]
 
     def counts(self) -> dict[str, int]:
         rows = self.conn.execute("SELECT status, COUNT(*) n FROM jobs GROUP BY status").fetchall()

@@ -104,7 +104,7 @@ details.side summary { cursor: pointer; }
 table { width: 100%; border-collapse: collapse; }
 td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-weight: 500; font-size: 12px; }
-input[type=text], input[type=email], select, textarea {
+input[type=text], input[type=email], input[type=password], select, textarea {
   width: 100%; font: inherit; color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
 }
@@ -112,6 +112,8 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); bo
 textarea { min-height: 160px; }
 textarea.code { min-height: 520px; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
 input[type=file] { color: var(--muted); }
+.keyrow { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+.keyrow input { flex: 1; }
 button, .btn {
   font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
   background: var(--panel-2); color: var(--ink); cursor: pointer; text-decoration: none;
@@ -173,3 +175,21 @@ pre.diff {
   .lanes, .kpis { grid-template-columns: 1fr; }
   .top { flex-wrap: wrap; }
 }
+
+/* AI usage widget (JH-66) */
+.usage { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 0 0 16px; }
+.usage-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.usage-card.amber { border-color: var(--needs); }
+.usage-card.red { border-color: var(--danger); }
+.usage-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; margin-bottom: 8px; }
+.meter { margin: 6px 0; }
+.meter-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.meter .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 3px; }
+.meter .bar i { display: block; height: 100%; background: var(--ready); }
+.meter.amber .bar i { background: var(--needs); }
+.meter.red .bar i { background: var(--danger); }
+.small { font-size: 12px; }
+.badge.quota { color: var(--needs); border-color: var(--needs); }
+.card .badge.quota { margin-top: 4px; display: inline-block; font-size: 11px; }
+.quota-note { margin: 8px 0; }
+.history .spark { display: inline-block; height: 6px; width: calc(var(--w) * 0.6px); background: var(--ready); border-radius: 3px; margin-right: 6px; vertical-align: middle; }
