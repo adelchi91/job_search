@@ -1,6 +1,6 @@
 """Which model a user's run may use.
 
-The admin runs on Claude (API key or the signed-in `claude` CLI, see llm.get_llm), then on
+The admin runs on Claude (the signed-in `claude` CLI or the API key, see llm.admin_llm), then on
 their own keys. Everyone else only ever uses the Groq or Mistral key they saved themselves
 under My files: the server's Claude access is never handed to another user. With no key
 the callers fall back to their deterministic heuristics. Every call is counted in the
@@ -17,7 +17,7 @@ from pathlib import Path
 import httpx
 
 from job_hunter import usage
-from job_hunter.llm import LLM, extract_json, get_llm
+from job_hunter.llm import LLM, admin_llm, extract_json
 from job_hunter.secrets_store import EncryptedKeyStore, KeyStore
 from job_hunter.users import User
 
@@ -108,7 +108,7 @@ def llm_for(
     user: User,
     db_path: Path,
     keys: KeyStore,
-    claude: Callable[[], LLM | None] = get_llm,
+    claude: Callable[[], LLM | None] = admin_llm,
     transport=None,
 ) -> LLM | None:
     """The LLM for one user's run, or None (heuristics only). Never Claude for non-admins."""
@@ -129,7 +129,7 @@ def llm_for(
 LLMFactory = Callable[[User, Path], LLM | None]
 
 
-def make_llm_factory(fernet, claude: Callable[[], LLM | None] = get_llm) -> LLMFactory:
+def make_llm_factory(fernet, claude: Callable[[], LLM | None] = admin_llm) -> LLMFactory:
     """factory(user, data_dir) -> that user's LLM, reading their keys with the server key."""
 
     def factory(user: User, data_dir: Path) -> LLM | None:

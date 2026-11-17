@@ -16,9 +16,8 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from job_hunter import applier
-from job_hunter.llm_router import LLMFactory, make_llm_factory
 from job_hunter.keystore import KeyStore, default_keystore
-from job_hunter.llm import get_llm
+from job_hunter.llm_router import LLMFactory, make_llm_factory
 from job_hunter.models import Status
 from job_hunter.routing import AUTO_ATS
 from job_hunter.userfiles import resolve_in
@@ -207,6 +206,7 @@ def create_app(
 ) -> FastAPI:
     """root is the data dir in local mode, or the volume holding allowlist.yaml + users/."""
     from job_hunter.web.admin import install_admin
+    from job_hunter.web.claude_panel import install_claude
     from job_hunter.web.files import install_files
     from job_hunter.web.keys import install_keys
     from job_hunter.web.usage import install_usage
@@ -238,6 +238,7 @@ def create_app(
     install_files(app)
     install_keys(app)
     install_admin(app)
+    install_claude(app)
     install_usage(app)
     ai_settings.register(app)
     return app

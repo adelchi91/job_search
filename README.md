@@ -117,6 +117,24 @@ a fallback). Keys are encrypted at rest, shown only as a mask, and never leave t
 export. Without a key a person's runs use the heuristics. Each person sees their own AI usage on
 **My files**. The admin sees everyone's on the **Admin** page.
 
+### Claude account (Admin page)
+
+**Admin → Claude account** shows which Claude account the `claude` CLI is signed in to (email,
+plan, CLI version) and has **Sign in** / **Re-authenticate**. The app runs the CLI's own
+`claude auth login` and shows its output under **Login log**; it never reads or stores the
+token itself.
+
+- **Locally**, a new tab opens on claude.ai. Approve there and the CLI finishes on its own.
+- **On the server**, open the sign-in link the panel shows, approve, then paste the code that
+  claude.ai displays into the panel.
+
+If a call is refused, or the login lapses, the panel says **Login expired — re-authenticate**.
+
+The Claude subscription only serves the admin: your own CV import, scoring and tailoring.
+Other people's actions and daily runs never call Claude (they use their own Groq or Mistral
+key, else the keyword heuristics). With `ANTHROPIC_API_KEY` set, the admin falls back to the API
+when the CLI is signed out.
+
 Locally (no `GOOGLE_CLIENT_ID` set) the app has a single user, no sign-in, and keeps using
 `data/` exactly as before.
 
@@ -162,11 +180,15 @@ list still gets "not invited".
 | `APP_URL` | `https://<your-app>.up.railway.app` |
 | `JOB_HUNTER_ENCRYPTION_KEY` | **required**: encrypts the Groq/Mistral keys people save. Generate it with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` |
 | `ALLOWED_EMAILS` | optional comma list of Google addresses that may always sign in (in addition to the Admin page list; they cannot be removed there) |
-| `ANTHROPIC_API_KEY` | for the admin's scoring, tailoring and CV-from-PDF |
+| `ANTHROPIC_API_KEY` | optional: the admin's fallback for scoring, tailoring and CV-from-PDF when the Claude CLI is not signed in |
 | `JOB_HUNTER_SCHEDULER` | `1` (turns on the weekday 08:00 run) |
 | `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASSWORD` `SMTP_FROM` | digest email, e.g. `smtp.gmail.com`, `587`, a Gmail address and a Gmail **app password** (optional: without them there is no email) |
 
 Keep the service at **1 replica**: the scheduler and the SQLite files live in one process.
+
+The image includes a pinned `claude` CLI (`CLAUDE_CODE_VERSION` build arg, auto-update off).
+Its login is kept in `/data/.claude` (`CLAUDE_CONFIG_DIR`, mode 700), outside every user's
+folder, so it survives redeploys. Sign it in once from **Admin → Claude account**.
 
 The server refuses to start without `JOB_HUNTER_ENCRYPTION_KEY`. Keep a copy of it somewhere
 safe: if it is lost or changed, the saved keys can no longer be read (the page then says

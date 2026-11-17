@@ -4,6 +4,9 @@ Backends: an OpenAI-compatible endpoint (Groq / Mistral with the user's own key,
 `providers.py`, or from GROQ_API_KEY / MISTRAL_API_KEY behind a QuotaGuard), the Anthropic API
 when ANTHROPIC_API_KEY is set, or the local `claude` CLI (Claude Code, already signed in).
 With none of them, callers fall back to deterministic heuristics.
+
+In the web app the choice is per user (llm_router): the admin's Claude Code subscription
+(signed in from Admin -> Claude account, see admin_llm) only ever serves the admin.
 Every API call is recorded in the current usage sink (see usage.py)."""
 
 from __future__ import annotations
@@ -15,12 +18,15 @@ import re
 import shutil
 import subprocess
 import time
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 import httpx
 
 from job_hunter import usage
 from job_hunter.ratelimit import Limiter, QuotaGuard, RateLimited, Slot, parse_rate_headers
+
+if TYPE_CHECKING:
+    from job_hunter.users import User
 
 log = logging.getLogger("job_hunter.llm")
 
@@ -63,20 +69,30 @@ class AnthropicLLM:
         return extract_json("".join(b.text for b in msg.content if b.type == "text"))
 
 
+AUTH_ERROR = re.compile(r"log ?in|authenticat|oauth|credential|\b401\b", re.I)
+
+
 class ClaudeCliLLM:
     def __init__(self, binary: str) -> None:
         self.binary = binary
 
     def json(self, prompt: str, *, model: str, system: str = "") -> dict:
         full = (system + "\n\n" if system else "") + prompt + "\n\nReply with one JSON object only."
-        out = subprocess.run(
-            [self.binary, "-p", "--output-format", "json", "--model", model],
-            input=full,
-            capture_output=True,
-            text=True,
-            timeout=300,
-            check=True,
-        )
+        try:
+            out = subprocess.run(
+                [self.binary, "-p", "--output-format", "json", "--model", model],
+                input=full,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                check=True,
+            )
+        except subprocess.CalledProcessError as exc:
+            if AUTH_ERROR.search(f"{exc.stdout or ''} {exc.stderr or ''}"):
+                from job_hunter import claude_auth
+
+                claude_auth.mark_auth_failed()
+            raise
         envelope = json.loads(out.stdout)
         return extract_json(envelope.get("result", ""))
 
@@ -220,13 +236,21 @@ def quota_guard(llm_limits: dict, client: httpx.Client | None = None, **kw) -> Q
     return QuotaGuard(slots, **kw) if slots else None
 
 
+def _api_llm() -> LLM | None:
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return None
+    try:
+        return AnthropicLLM()
+    except ImportError:
+        log.warning("ANTHROPIC_API_KEY set but `anthropic` not installed (uv sync --extra llm)")
+        return None
+
+
 def claude_llm() -> LLM | None:
     """The Anthropic API when ANTHROPIC_API_KEY is set, else the local `claude` CLI."""
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        try:
-            return AnthropicLLM()
-        except ImportError:
-            log.warning("ANTHROPIC_API_KEY set but `anthropic` not installed (uv sync --extra llm)")
+    api = _api_llm()
+    if api:
+        return api
     binary = shutil.which("claude")
     return ClaudeCliLLM(binary) if binary else None
 
@@ -238,3 +262,31 @@ def get_llm(llm_limits: dict | None = None) -> LLM | None:
     if guard is not None:
         return guard
     return claude_llm()
+
+
+def admin_claude() -> LLM | None:
+    """The admin's Claude: the CLI when signed in (Admin -> Claude account), else the API key."""
+    if os.environ.get("JOB_HUNTER_NO_LLM"):
+        return None
+    from job_hunter import claude_auth
+
+    exe = claude_auth.binary()
+    if exe and claude_auth.status().logged_in:
+        return ClaudeCliLLM(exe)
+    return _api_llm()
+
+
+def admin_llm() -> LLM | None:
+    """What the web admin's runs use before their own keys: env Groq/Mistral keys behind a
+    QuotaGuard, else admin_claude(). Only ever called for the admin (see llm_router)."""
+    if os.environ.get("JOB_HUNTER_NO_LLM"):
+        return None
+    guard = quota_guard(default_limits())
+    return guard if guard is not None else admin_claude()
+
+
+def llm_for(user: User | None) -> LLM | None:
+    """The Claude a web user may spend: the admin's own, never anyone else's."""
+    if user is None or not user.admin:
+        return None
+    return admin_claude()
